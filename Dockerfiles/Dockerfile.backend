@@ -1,6 +1,7 @@
 FROM python:3.10-alpine as base
 
 RUN apk update && apk upgrade
+RUN apk add gcc musl-dev libffi-dev
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 COPY ./form_manager /code/form_manager
