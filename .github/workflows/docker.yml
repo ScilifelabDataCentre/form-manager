@@ -60,3 +60,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64 # the qemu and buildx steps can be skipped if arm is removed
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ matrix.images }}:${{ steps.meta.outputs.tags }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
