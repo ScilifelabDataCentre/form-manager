@@ -11,7 +11,7 @@ jobs:
     if: github.repository == 'talavis/form-manager'
     name: Publish Docker Image
     concurrency:
-      group: ${{ github.ref }}
+      group: ${{ github.ref }}-docker
       cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:

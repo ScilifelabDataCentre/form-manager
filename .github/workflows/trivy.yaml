@@ -9,7 +9,7 @@ jobs:
     name: Trivy Scan
     runs-on: ubuntu-22.04
     concurrency:
-      group: ${{ github.ref }}
+      group: ${{ github.ref }}-trivy
       cancel-in-progress: true
     steps:
       - name: Checkout code
