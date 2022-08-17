@@ -1,5 +1,13 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+  release:
+    types: [published]
 jobs:
   fossa-scan:
+    if: github.repository == 'talavis/form-manager'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
