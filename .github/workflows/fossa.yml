@@ -8,6 +8,11 @@ on:
 jobs:
   fossa-scan:
     if: github.repository == 'talavis/form-manager'
+    concurrency:
+      group: ${{ github.ref }}-fossa
+      cancel-in-progress: true
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
