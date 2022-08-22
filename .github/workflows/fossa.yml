@@ -7,7 +7,7 @@ on:
     types: [published]
 jobs:
   fossa-scan:
-    if: github.repository == 'talavis/form-manager'
+    if: github.repository == 'scilifelabdatacentre/form-manager'
     concurrency:
       group: ${{ github.ref }}-fossa
       cancel-in-progress: true
