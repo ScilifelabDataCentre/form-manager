@@ -30,4 +30,6 @@ class Config(object):
     MAIL_USE_SSL = False
     MAIL_DEFAULT_SENDER = ("Form Manager", "forms@example.com")
 
+    USER_FILTER = {} # Limits to users that may use the system, e.g. {"email": ["scilifelab.se"]}
+
     REVERSE_PROXY = False  # Behind a reverse proxy, use X_Forwarded-For to get the ip
