@@ -1,7 +1,6 @@
 <template>
 <q-page class="flex flex-center">
   <q-table
-    style="max-width: 950px"
     title="Forms"
     :rows="entries"
     :columns="columns"
@@ -296,7 +295,7 @@ export default defineComponent({
       let outgoing = JSON.parse(JSON.stringify(this.editData[entry.key]));
       delete outgoing.saving;
       delete outgoing.saveError;
-      axios
+      this.$axios
 	.patch('/api/v1/form/' + entry.row.identifier, outgoing, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then((response) => {
 	  entry.expand = false;
