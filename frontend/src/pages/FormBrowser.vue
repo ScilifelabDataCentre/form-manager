@@ -1,7 +1,7 @@
 <template>
 <q-page class="flex flex-center">
   <q-table
-    style="max-width: 850px"
+    style="max-width: 950px"
     title="Forms"
     :rows="entries"
     :columns="columns"
@@ -185,8 +185,6 @@
 <script>
 import { defineComponent } from 'vue'
 
-import axios from 'axios'
-
 import StringListEditor from 'components/StringListEditor.vue'
 
 export default defineComponent({
@@ -248,7 +246,7 @@ export default defineComponent({
   methods: {
     getEntries () {
       this.loading = true;
-      axios
+      this.$axios
 	.get('/api/v1/form')
         .then((response) => {
 	  this.entries = response.data['forms']
@@ -262,7 +260,8 @@ export default defineComponent({
       this.$router.push({name: 'FormResponses', params: {identifier: identifier}});
     },
     deleteForm(entry) {
-      axios
+      console.log(this.$q.cookies)
+      this.$axios
 	.delete('/api/v1/form/' + entry.row.identifier, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then(() => {
 	  entry.expand = false;
@@ -271,7 +270,7 @@ export default defineComponent({
 	})
     },
     addForm() {
-      axios
+      this.$axios
 	.post('/api/v1/form', {}, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then(() => this.getEntries())
     },
