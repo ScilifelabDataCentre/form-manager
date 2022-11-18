@@ -38,7 +38,7 @@ export default route(function (/* { store, ssrContext } */) {
 	    else
 	      next()
 	  }
-	  else if (to.name === 'Login')	    
+	  else if (to.name === 'Login')
 	    next({name: 'FormBrowser'})
 	  else
 	    next()

@@ -14,6 +14,7 @@ services:
       dockerfile: Dockerfiles/Dockerfile.backend
       target: dev
     environment:
+      FLASK_DEBUG: 1
       FLASK_ENV: development
       FLASK_APP: form_manager
       TZ: Europe/Stockholm
@@ -33,6 +34,8 @@ services:
     restart: on-failure
     environment:
       VERSION: "dev"
+    ports:
+      - 127.0.0.1:9000:9000
     volumes:
       - type: bind
         source: ./frontend/src
@@ -49,7 +52,7 @@ services:
     volumes:
       - type: bind
         source: ./Dockerfiles/nginx.conf.dev
-        target: /etc/nginx/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
 
   mailcatcher:
     image: sj26/mailcatcher:latest
