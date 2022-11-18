@@ -80,9 +80,9 @@ def get_form_info(identifier: str):
     """
     entry = flask.g.db["forms"].find_one({"identifier": identifier}, {"_id": 0})
     if not entry:
-        flask.abort(status=404)
+        flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
-        flask.abort(status=403)
+        flask.abort(code=403)
     return flask.jsonify(
         {
             "form": entry,
@@ -103,7 +103,7 @@ def add_form():
         entry["identifier"] = utils.generate_id()
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
-        flask.abort(status=400)
+        flask.abort(code=400)
     entry.update(indata)
     entry["owners"] = [flask.session["email"]]
     flask.g.db["forms"].insert_one(entry)
@@ -123,18 +123,18 @@ def edit_form(identifier: str):
     """
     indata = flask.request.get_json(silent=True)
     if not indata:
-        flask.abort(status=400)
+        flask.abort(code=400)
     entry = flask.g.db["forms"].find_one({"identifier": identifier})
     if not entry:
-        flask.abort(status=404)
+        flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
-        flask.abort(status=403)
+        flask.abort(code=403)
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
-        flask.abort(status=400)
+        flask.abort(code=400)
     entry.update(indata)
     flask.g.db["forms"].update_one({"_id": entry["_id"]}, {"$set": entry})
-    return flask.Response(status=200)
+    return flask.Response(code=200)
 
 
 @blueprint.route("/<identifier>", methods=["DELETE"])
@@ -148,12 +148,12 @@ def delete_form(identifier: str):
     """
     entry = flask.g.db["forms"].find_one({"identifier": identifier})
     if not entry:
-        flask.abort(status=404)
+        flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
-        flask.abort(status=403)
+        flask.abort(code=403)
     flask.g.db["forms"].delete_one(entry)
     flask.g.db["responses"].delete_many({"identifier": entry["identifier"]})
-    return flask.Response(status=200)
+    return flask.Response(code=200)
 
 
 @csrf.exempt
@@ -167,7 +167,7 @@ def receive_response(identifier: str):
     """
     form_info = flask.g.db["forms"].find_one({"identifier": identifier})
     if not form_info:
-        return flask.abort(status=400)
+        return flask.abort(code=400)
     form_response = dict(flask.request.form)
 
     if form_info.get("redirect"):
@@ -216,9 +216,9 @@ def get_form_url(identifier: str):
     """
     entry = flask.g.db["forms"].find_one({"identifier": identifier}, {"_id": 0})
     if not entry:
-        flask.abort(status=404)
+        flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
-        flask.abort(status=403)
+        flask.abort(code=403)
     return flask.jsonify(
         {
             "method": "POST",
@@ -229,20 +229,20 @@ def get_form_url(identifier: str):
     )
 
 
-@blueprint.route("/<identifier>/responses", methods=["GET"])
+@blueprint.route("/<identifier>/submissions", methods=["GET"])
 @utils.login_required
-def get_responses(identifier):
+def get_submissions(identifier):
     """
-    List form responses.
+    List form submissions.
 
     Args:
         identifier (str): The form identifier.
     """
     form_info = flask.g.db["forms"].find_one({"identifier": identifier})
     if not form_info:
-        flask.abort(status=404)
+        flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
-        flask.abort(status=403)
+        flask.abort(code=403)
     responses = list(flask.g.db["responses"].find({"identifier": identifier}))
     for response in responses:
         response["id"] = str(response["_id"])
