@@ -1,7 +1,7 @@
 <template>
-<q-page class="flex flex-center">
+<q-page class="flex items-center justify-center">
   <q-table
-    style="max-width: 950px"
+    style="max-width: 97% ;min-width: 850px"
     title="Forms"
     :rows="entries"
     :columns="columns"
@@ -20,7 +20,7 @@
 	outline
 	icon="add"
 	@click="addForm" />      
-      <q-input rounded outlined dense debounce="300" v-model="filter" placeholder="Search">
+      <q-input v-model="filter" rounded outlined dense debounce="300" placeholder="Search">
         <template #append>
           <q-icon name="search" />
         </template>
@@ -43,12 +43,12 @@
       <q-tr :props="props">
 	<q-td auto-width>
           <q-btn
-            @click="expandItem(props)"
             color="primary"
             :icon="props.expand ? 'expand_less' : 'expand_more'"
             size="sm"
             round
             dense
+	    @click="expandItem(props)"
             />
 	</q-td>
         <q-td key="title" :props="props">
@@ -95,30 +95,30 @@
             <q-item>
               <q-item-section>
 		<q-input
+		  v-model="editData[props.key].title"
 		  dense
 		  outlined
 		  label="Title"
-		  v-model="editData[props.key].title"
 		  />
               </q-item-section>
             </q-item>
             <q-item>
               <q-item-section>
 		<q-input
+		  v-model="editData[props.key].redirect"
 		  dense
 		  outlined
 		  label="Redirect to"
-		  v-model="editData[props.key].redirect"
 		  />
               </q-item-section>
             </q-item>
             <q-item>
               <q-item-section>
 		<q-input
+		  v-model="editData[props.key].recaptcha_secret"
 		  dense
 		  outlined
 		  label="Recaptcha secret"
-		  v-model="editData[props.key].recaptcha_secret"
 		  />
               </q-item-section>
             </q-item>
@@ -192,6 +192,7 @@ export default defineComponent({
   components: {
     'str-list-editor': StringListEditor,
   },
+
   data () {
     return {
       entries: [],
@@ -243,6 +244,11 @@ export default defineComponent({
       ]
     }
   },
+
+  mounted () {
+    this.getEntries();
+  },
+
   methods: {
     getEntries () {
       this.loading = true;
@@ -296,7 +302,7 @@ export default defineComponent({
       let outgoing = JSON.parse(JSON.stringify(this.editData[entry.key]));
       delete outgoing.saving;
       delete outgoing.saveError;
-      axios
+      this.$axios
 	.patch('/api/v1/form/' + entry.row.identifier, outgoing, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then((response) => {
 	  entry.expand = false;
@@ -311,9 +317,5 @@ export default defineComponent({
       delete this.editData[entry.key];
     },
   },
-
-  mounted () {
-    this.getEntries();
-  }
 })
 </script>

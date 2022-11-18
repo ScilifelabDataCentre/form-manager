@@ -2,14 +2,14 @@
 <div>
   <div>
     <q-input
+      v-model="newValue"
       dense
       stack-label
       hide-bottom-space
       outlined
       :label="fieldTitle"
-      v-model="newValue"
-      @keyup.enter="addValue"
       :rules="[ function (val) { return (evaluateValue(val) || val.length === 0) || 'No whitespace at beginning nor end and must not already exist.' }]">
+      @keyup.enter="addValue"
       <template #after>
         <q-btn
 	  icon="add"
@@ -42,6 +42,31 @@ import { useUserStore } from 'stores/user'
 export default {
   name: 'StringListEditor',
 
+  props: {
+    staticCurrentUser: {
+      type: Boolean,
+      default: false,
+    },
+    modelValue: {
+      type: Array,
+      required: true,
+    },
+
+    fieldTitle: {
+      type: String,
+      required: true,
+    },
+  },
+
+  emits: ['update:modelValue'],
+
+  data () {
+    return {
+      newValue: '',
+      valueExistsError: false,
+    }
+  },
+
   computed: {
     enableAdd: {
       get () {
@@ -55,32 +80,7 @@ export default {
       }
     },
   },
-  
-  props: {
-    staticCurrentUser: {
-      type: Boolean,
-      default: false,
-    },
 
-    modelValue: {
-      type: Array,
-      required: true,
-    },
-
-    fieldTitle: {
-      type: String,
-      required: true,
-    },
-  },
-
-  data () {
-    return {
-      newValue: '',
-      valueExistsError: false,
-    }
-  },
-
-  emits: ['update:modelValue'],
   methods: {
     evaluateValue (val) {
       return (val.trim() === val && !this.modelValue.includes(this.newValue));
