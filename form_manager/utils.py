@@ -88,7 +88,7 @@ def login_required(func):
     @functools.wraps(func)
     def inner(*args, **kwargs):
         if not flask.session.get("email"):
-            flask.abort(status=403)
+            flask.abort(code=403)
         return func(*args, **kwargs)
 
     return inner
