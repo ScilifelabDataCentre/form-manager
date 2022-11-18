@@ -10,11 +10,11 @@
 	  {{ version }}
 	</div>
         <q-btn
+	  v-if="userStore.email !== ''"
 	  flat
 	  round
 	  type="a"
 	  href="/api/v1/user/logout"
-	  v-if="userStore.email !== ''"
 	  icon="logout"
 	  />
       </q-toolbar>
