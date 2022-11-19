@@ -152,15 +152,15 @@ def delete_form(identifier: str):
     if not utils.has_form_access(flask.session["email"], entry):
         flask.abort(code=403)
     flask.g.db["forms"].delete_one(entry)
-    flask.g.db["responses"].delete_many({"identifier": entry["identifier"]})
-    return flask.Response(code=200)
+    flask.g.db["submissions"].delete_many({"identifier": entry["identifier"]})
+    return flask.Submission(code=200)
 
 
 @csrf.exempt
 @blueprint.route("/<identifier>/incoming", methods=["POST"])
-def receive_response(identifier: str):
+def receive_submission(identifier: str):
     """
-    Save a form response to the db.
+    Save a form submission to the db.
 
     Args:
         identifier (str): The form identifier.
@@ -168,7 +168,7 @@ def receive_response(identifier: str):
     form_info = flask.g.db["forms"].find_one({"identifier": identifier})
     if not form_info:
         return flask.abort(code=400)
-    form_response = dict(flask.request.form)
+    form_submission = dict(flask.request.form)
 
     if form_info.get("redirect"):
         redirect_args = f"?redirect={form_info['redirect']}"
@@ -176,14 +176,14 @@ def receive_response(identifier: str):
         redirect_args = ""
 
     if form_info.get("recaptcha_secret"):
-        if "g-recaptcha-response" not in form_response or not utils.verify_recaptcha(
-            form_info["recaptcha_secret"], form_response["g-recaptcha-response"]
+        if "g-recaptcha-response" not in form_submission or not utils.verify_recaptcha(
+            form_info["recaptcha_secret"], form_submission["g-recaptcha-response"]
         ):
             return flask.redirect(f"/failure{redirect_args}")
-        del form_response["g-recaptcha-response"]
+        del form_submission["g-recaptcha-response"]
 
     if form_info.get("email_recipients"):
-        text_body = json.dumps(form_response, indent=2, sort_keys=True, ensure_ascii=False)
+        text_body = json.dumps(form_submission, indent=2, sort_keys=True, ensure_ascii=False)
         text_body += f"\n\nSubmission received: {utils.make_timestamp()}"
         mail.send(
             flask_mail.Message(
@@ -194,13 +194,13 @@ def receive_response(identifier: str):
         )
 
     to_add = {
-        "response": form_response,
+        "submission": form_submission,
         "timestamp": utils.make_timestamp(),
         "identifier": identifier,
         "origin": flask.request.environ.get("HTTP_ORIGIN", "-"),
     }
 
-    flask.g.db["responses"].insert_one(to_add)
+    flask.g.db["submissions"].insert_one(to_add)
 
     return flask.redirect(f"/success{redirect_args}")
 
@@ -223,13 +223,13 @@ def get_form_url(identifier: str):
         {
             "method": "POST",
             "submission_url": flask.url_for(
-                "forms.receive_response", identifier=identifier, _external=True
+                "forms.receive_submission", identifier=identifier, _external=True
             ),
         }
     )
 
 
-@blueprint.route("/<identifier>/submissions", methods=["GET"])
+@blueprint.route("/<identifier>/submission", methods=["GET"])
 @utils.login_required
 def get_submissions(identifier):
     """
