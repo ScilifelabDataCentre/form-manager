@@ -17,7 +17,7 @@ def user_info():
 @blueprint.route("/login")
 def oidc_login():
     """Perform a login using OpenID Connect."""
-    redirect_uri = flask.url_for("user.oidc_authorize", _external=True)        
+    redirect_uri = flask.url_for("user.oidc_authorize", _external=True)
     return oauth.oidc_entry.authorize_redirect(redirect_uri)
 
 
@@ -31,7 +31,7 @@ def oidc_authorize():
     if domain_limit:
         user_email = token.get("userinfo", {}).get("email")
         try:
-            domain = user_email[user_email.index('@')+1:]
+            domain = user_email[user_email.index("@") + 1 :]
         except ValueError:
             flask.abort(400)
         if domain not in domain_limit:
