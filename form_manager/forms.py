@@ -134,7 +134,7 @@ def edit_form(identifier: str):
         flask.abort(code=400)
     entry.update(indata)
     flask.g.db["forms"].update_one({"_id": entry["_id"]}, {"$set": entry})
-    return flask.Response(code=200)
+    return ""
 
 
 @blueprint.route("/<identifier>", methods=["DELETE"])
