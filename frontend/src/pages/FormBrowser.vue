@@ -268,7 +268,8 @@ export default defineComponent({
     deleteForm(entry) {
       console.log(this.$q.cookies)
       this.$axios
-	.delete('/api/v1/form/' + entry.row.identifier, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
+	.delete('/api/v1/form/' + entry.row.identifier,
+		{headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then(() => {
 	  entry.expand = false;
 	  delete this.editData[entry.row.identifier];
