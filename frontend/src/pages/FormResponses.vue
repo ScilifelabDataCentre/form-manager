@@ -8,7 +8,9 @@
     :to="{ name: 'FormBrowser' }"
     />
   
-  <q-card v-if="Object.keys(urlInfo).length > 0" class="q-my-sm">
+  <q-card
+    v-if="Object.keys(urlInfo).length > 0"
+    class="q-my-sm">
     <q-card-section>
       &lt;form action="{{ urlInfo.submission_url }}" method="{{ urlInfo.method }}" accept-charset="utf-8"&gt;
     </q-card-section>
@@ -17,7 +19,7 @@
   <q-table
     class="q-my-lg"
     :title="formInfo.title"
-    :rows="listingType === 'submission' ? rawResponses : questions"
+    :rows="listingType === 'submission' ? rawSubmissions : questions"
     :columns="listingType === 'submission' ? columnsSubmission : columnsQuestion"
     :pagination="pagination"
     row-key="id"
@@ -55,12 +57,12 @@
       <q-tr :props="props">
         <q-td auto-width>
           <q-btn
-            @click="props.expand = !props.expand"
             color="primary"
             :icon="props.expand ? 'expand_less' : 'expand_more'"
             size="sm"
             round
             dense
+	    @click="props.expand = !props.expand"
             />
         </q-td>
         <q-td
@@ -70,15 +72,30 @@
           >
           {{ col.value }}
         </q-td>
+	<q-td>
+	  <q-btn
+	    v-if="listingType === 'submission'"
+	    color="red"
+	    icon="delete"
+	    flat
+	    @click="deleteSubmission(props.row.id)"
+	    />
+	</q-td>
       </q-tr>
       <q-tr v-show="props.expand" :props="props">
         <q-td colspan="100%">
           <q-scroll-area style="height: 250px; max-width: 100%;">
-            <q-markup-table flat v-if="listingType === 'submission'" :wrap-cells="true">
+            <q-markup-table
+	      v-if="listingType === 'submission'"
+	      :wrap-cells="true" flat
+	      >
               <thead>
               </thead>
               <tbody>
-		<tr v-for="value, key in props.row.response" :key="key">
+		<tr
+		  v-for="value, key in props.row.submission"
+		  :key="key"
+		  >
                   <td class="text-weight-bold text-left">
                     {{ key }}
                   </td>
@@ -88,11 +105,13 @@
 		</tr>
               </tbody>
             </q-markup-table>
-            <q-markup-table flat v-else>
+            <q-markup-table v-else flat>
               <thead>
               </thead>
               <tbody>
-		<tr v-for="value, i in props.row.responses" :key="i">
+		<tr
+		  v-for="value, i in props.row.submissions"
+		  :key="i">
                   <td>
                     {{ value }}
                   </td>
@@ -105,53 +124,27 @@
     </template>
   </q-table>
 
-
   <q-btn
     label="Copy JSON to clipboard"
     icon="content_copy"
     class="q-my-lg"
     color="secondary"
-    @click="jsonToClipboard(listingType === 'submission' ? rawResponses : questions)"
+    @click="jsonToClipboard(listingType === 'submission' ? rawSubmissions : questions)"
     />
 </q-page>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
-import axios from 'axios'
 import { copyToClipboard } from 'quasar'
 
 export default defineComponent({
-  name: 'FormResponses',
+  name: 'FormSubmissions',
   props: {
     identifier: {
       type: String,
       required: true,
     }
-  },
-
-  computed: {
-    questions: {
-      get () {
-        let outData = [];
-	let tmpData = {};
-	for (let entry of this.rawResponses) {
-	  for (let key in entry.response) {
-	    if (!entry.response[key].length)
-	      continue
-	    if (key in tmpData) {
-	      tmpData[key].push(entry.response[key]);
-	    }
-	    else {
-	      tmpData[key] = [entry.response[key]];
-	    }
-	  }
-	}
-	for (let key in tmpData)
-	  outData.push({id: key, responses: tmpData[key], count: tmpData[key].length})
-	return outData;
-      }
-    },
   },
 
   data () {
@@ -189,17 +182,17 @@ export default defineComponent({
           sortable: true
         },
 	{
-          name: 'responseCount',
-          label: 'Response Count',
+          name: 'submissionCount',
+          label: 'Submission Count',
           field: 'count',
           required: true,
           sortable: true
         },
 
       ],
-      rawResponses: [],
-      responsesLoading: false,
-      responsesError: false,
+      rawSubmissions: [],
+      submissionsLoading: false,
+      submissionsError: false,
       infoLoading: false,
       infoError: false,
       urlLoading: false,
@@ -210,9 +203,37 @@ export default defineComponent({
     }
   },
 
+  computed: {
+    questions: {
+      get () {
+        let outData = [];
+	let tmpData = {};
+	for (let entry of this.rawSubmissions) {
+	  for (let key in entry.submission) {
+	    if (!entry.submission[key].length)
+	      continue
+	    if (key in tmpData) {
+	      tmpData[key].push(entry.submission[key]);
+	    }
+	    else {
+	      tmpData[key] = [entry.submission[key]];
+	    }
+	  }
+	}
+	for (let key in tmpData)
+	  outData.push({id: key, submissions: tmpData[key], count: tmpData[key].length})
+	return outData;
+      }
+    },
+  },
+
+  mounted () {
+    this.getEntry()
+  },
+
   methods: {
-    jsonToClipboard (responseData) {
-      copyToClipboard(JSON.stringify(responseData))
+    jsonToClipboard (submissionData) {
+      copyToClipboard(JSON.stringify(submissionData))
 	.then(() => {
 	  // success!
 	})
@@ -226,32 +247,35 @@ export default defineComponent({
       })
     },
     getEntry () {
-      this.responsesLoading = true;
-      this.responsesError = false;
-      axios
-	.get('/api/v1/form/' + this.identifier + '/responses')
-        .then((response) => this.rawResponses = response.data.responses)
-	.catch(() => this.responsesError = true)
-	.finally(() => this.responsesLoading = false);
+      this.submissionsLoading = true;
+      this.submissionsError = false;
+      this.$axios
+	.get('/api/v1/form/' + this.identifier + '/submission')
+        .then((submission) => this.rawSubmissions = submission.data.submissions)
+	.catch(() => this.submissionsError = true)
+	.finally(() => this.submissionsLoading = false);
       this.infoLoading = true;
       this.infoError = false;
-      axios
+      this.$axios
 	.get('/api/v1/form/' + this.identifier)
-        .then((response) => this.formInfo = response.data.form)
+        .then((submission) => this.formInfo = submission.data.form)
 	.catch((err) => this.infoError = true)
       	.finally(() => this.infoLoading = false);
       this.urlLoading = true;
       this.urlError = false;
-      axios
+      this.$axios
 	.get('/api/v1/form/' + this.identifier + '/url')
-        .then((response) => this.urlInfo = response.data)
+        .then((submission) => this.urlInfo = submission.data)
 	.catch((err) => this.urlError = true)
       	.finally(() => this.urlLoading = false);
     },
+    deleteSubmission(subid) {
+      this.$axios
+	.delete('/api/v1/form/' + this.identifier + '/submission/' + subid,
+	       {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
+        .then(() => this.getEntry())
+	.catch(() => console.log('Failed to delete entry ' + subid))
+    }
   },
-
-  mounted () {
-    this.getEntry()
-  }
 })
 </script>
