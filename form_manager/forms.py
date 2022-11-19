@@ -1,6 +1,7 @@
 """Endpoints related to forms."""
 import json
 import pprint
+from bson import ObjectId
 
 import flask
 import flask_mail
@@ -243,13 +244,33 @@ def get_submissions(identifier):
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(code=403)
-    responses = list(flask.g.db["responses"].find({"identifier": identifier}))
-    for response in responses:
-        response["id"] = str(response["_id"])
-        del response["_id"]
+    submissions = list(flask.g.db["submissions"].find({"identifier": identifier}))
+    for submission in submissions:
+        submission["id"] = str(submission["_id"])
+        del submission["_id"]
     return flask.jsonify(
         {
-            "responses": responses,
-            "url": flask.url_for("forms.get_responses", identifier=identifier, _external=True),
+            "submissions": submissions,
+            "url": flask.url_for("forms.get_submissions", identifier=identifier, _external=True),
         }
     )
+
+
+@blueprint.route("/<identifier>/submission/<subid>", methods=["DELETE"])
+@utils.login_required
+def delete_submission(identifier: str, subid: str):
+    """
+    Delete a form submission.
+
+    Args:
+        identifier (str): The form identifier.
+        subid (str): The submission identifier.
+    """
+    form_info = flask.g.db["forms"].find_one({"identifier": identifier})
+    if not form_info:
+        flask.abort(404)
+    if not utils.has_form_access(flask.session["email"], form_info):
+        flask.abort(403)
+    if flask.g.db["submissions"].delete_one({"_id": ObjectId(subid)}).deleted_count != 1:
+        flask.abort(500, {"message": "Failed to delete entry"})
+    return ""
