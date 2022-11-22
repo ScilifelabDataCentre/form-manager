@@ -1,0 +1,23 @@
+---
+# Perform Python code linting using black
+# Remember to change "./code-folder" to the folder with the code
+name: Black formatting
+
+on: [push, pull_request]
+
+jobs:
+  BlackFormatting:
+    concurrency:
+      group: ${{ github.ref }}-black
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check code formatting with Black
+        uses: psf/black@stable
+        with:
+          options: "-l 100 --check"
+          src: "./form_manager"
