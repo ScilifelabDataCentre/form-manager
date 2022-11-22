@@ -2,6 +2,7 @@
 from datetime import datetime
 import functools
 import os
+import re
 import secrets
 
 import flask
@@ -111,3 +112,25 @@ def has_form_access(username, entry):
         bool: Whether the user has access.
     """
     return username in entry["owners"]
+
+
+def apply_template(template: str, data: dict) -> str:
+    """
+    Fill a template with the values of the defined variables.
+
+    Variables are entered as ``{{ variable }}``.
+    Currently using simple text replacement, but may use Jinja in the future.
+
+    Args:
+        template (str): The template.
+        data (dict): The variables to use.
+
+    Returns:
+        str: The resulting text.
+    """
+    possible_inserts = re.findall(r"{{ (.+?) }}", template)
+    for ins in possible_inserts:
+        if data.get(ins):
+            template = template.replace(f"{{ {ins} }}", data[ins])
+
+    return template
