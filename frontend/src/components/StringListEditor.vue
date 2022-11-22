@@ -8,8 +8,9 @@
       hide-bottom-space
       outlined
       :label="fieldTitle"
-      :rules="[ function (val) { return (evaluateValue(val) || val.length === 0) || 'No whitespace at beginning nor end and must not already exist.' }]">
+      :rules="[ function (val) { return (evaluateValue(val) || val.length === 0) || 'No whitespace at beginning nor end and must not already exist.' }]"
       @keyup.enter="addValue"
+      >
       <template #after>
         <q-btn
 	  icon="add"
