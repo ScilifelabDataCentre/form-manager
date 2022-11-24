@@ -157,7 +157,7 @@ def delete_form(identifier: str):
         flask.abort(code=403)
     flask.g.db["forms"].delete_one(entry)
     flask.g.db["submissions"].delete_many({"identifier": entry["identifier"]})
-    return flask.Submission(code=200)
+    return ""
 
 
 @csrf.exempt
