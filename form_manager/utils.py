@@ -133,8 +133,7 @@ def apply_template(template: str, data: dict) -> str:
     possible_inserts = re.findall(r"{{ (.+?) }}", template)
     for ins in possible_inserts:
         if data.get(ins):
-            template = template.replace(f"{{ {ins} }}", data[ins])
-
+            template = template.replace("{{ " + ins + " }}", data[ins])
     return template
 
 
