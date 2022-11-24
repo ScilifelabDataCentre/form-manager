@@ -1,11 +1,13 @@
 """General helper functions."""
 from datetime import datetime
 import functools
+import json
 import os
 import re
 import secrets
 
 import flask
+import flask_mail
 import pymongo
 import pytz
 import requests
@@ -134,3 +136,41 @@ def apply_template(template: str, data: dict) -> str:
             template = template.replace(f"{{ {ins} }}", data[ins])
 
     return template
+
+
+def gen_json_body(data: dict) -> str:
+    """
+    Generate a email body with formatted JSON.
+
+    Args:
+        data (dict): The data to include.
+
+    Returns:
+        str: The generated body text.
+    """
+    body = json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
+    body += f"\n\nSubmission received: {make_timestamp()}"
+    return body
+
+
+def send_email(form_info: dict, data: dict, mail_client):
+    """
+    Send an email with the submitted form content.
+
+    Args:
+        form_info (dict): Information about the form.
+        data (dict): The submitted form.
+    """
+    if form_info.get("email_custom"):
+        body_text = apply_template(form_info.get("email_text_template", ""), data)
+    else:
+        body_text = gen_json_body(data)
+    body_html = body_text
+    mail_client.send(
+        flask_mail.Message(
+            form_info.get("email_title"),
+            body=body_text,
+            html=body_html,
+            recipients=form_info["email_recipients"],
+        )
+    )
