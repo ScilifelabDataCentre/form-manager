@@ -202,7 +202,7 @@
 		    size="md"
 		    icon="delete"
 		    color="negative"
-		    @click="deleteForm(props)" />
+		    @click="confirmDelete(props)" />
 		  <span v-show="editData[props.key].saveError" class="text-negative">Save failed</span>
 		</div>
 	      </q-item-section>
@@ -252,7 +252,7 @@
           label="Delete"
           color="negative"
           class="user-edit-confirm-delete"
-          @click="deleteEntry" />
+          @click="deleteForm" />
         <q-btn
 	  v-close-popup
 	  flat
@@ -281,6 +281,7 @@ export default defineComponent({
       entries: [],
       editData: {},
       isDeleting: false,
+      toDelete: {},
       filter: '',
       loading: false,
       loadError: false,
@@ -353,14 +354,21 @@ export default defineComponent({
     gotoEntry(identifier) {
       this.$router.push({name: 'FormResponses', params: {identifier: identifier}});
     },
-    deleteForm(entry) {
+
+    confirmDelete(entry) {
+      this.toDelete = entry;
+      this.showDeleteWarning = true;
+    },
+
+    deleteForm() {
       this.isDeleting = true;
       this.$axios
-	.delete('/api/v1/form/' + entry.row.identifier,
+	.delete('/api/v1/form/' + this.toDelete.row.identifier,
 		{headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then(() => {
-	  entry.expand = false;
-	  delete this.editData[entry.row.identifier];
+	  this.toDelete.expand = false;
+	  this.showDeleteWarning = false;
+	  delete this.editData[this.toDelete.row.identifier];
 	  this.getEntries();
 	})
 	.finally(() => this.isDeleting = false);
