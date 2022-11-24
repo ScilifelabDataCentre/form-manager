@@ -1,5 +1,4 @@
 """Endpoints related to forms."""
-import json
 import pprint
 from bson import ObjectId
 
@@ -18,6 +17,10 @@ def form():
         "title": "",
         "recaptcha_secret": "",
         "email_recipients": [],
+        "email_custom": False,
+        "email_title": "",
+        "email_html_template": "",
+        "email_text_template": "",
         "owners": [],
         "redirect": "",
     }
@@ -154,7 +157,7 @@ def delete_form(identifier: str):
         flask.abort(code=403)
     flask.g.db["forms"].delete_one(entry)
     flask.g.db["submissions"].delete_many({"identifier": entry["identifier"]})
-    return flask.Submission(code=200)
+    return ""
 
 
 @csrf.exempt
@@ -184,15 +187,7 @@ def receive_submission(identifier: str):
         del form_submission["g-recaptcha-response"]
 
     if form_info.get("email_recipients"):
-        text_body = json.dumps(form_submission, indent=2, sort_keys=True, ensure_ascii=False)
-        text_body += f"\n\nSubmission received: {utils.make_timestamp()}"
-        mail.send(
-            flask_mail.Message(
-                f"Form from {form_info.get('title')}",
-                body=text_body,
-                recipients=form_info["email_recipients"],
-            )
-        )
+        utils.send_email(form_info, form_submission, mail)
 
     to_add = {
         "submission": form_submission,

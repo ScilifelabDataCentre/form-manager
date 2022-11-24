@@ -1,10 +1,13 @@
 """General helper functions."""
 from datetime import datetime
 import functools
+import json
 import os
+import re
 import secrets
 
 import flask
+import flask_mail
 import pymongo
 import pytz
 import requests
@@ -111,3 +114,63 @@ def has_form_access(username, entry):
         bool: Whether the user has access.
     """
     return username in entry["owners"]
+
+
+def apply_template(template: str, data: dict) -> str:
+    """
+    Fill a template with the values of the defined variables.
+
+    Variables are entered as ``{{ variable }}``.
+    Currently using simple text replacement, but may use Jinja in the future.
+
+    Args:
+        template (str): The template.
+        data (dict): The variables to use.
+
+    Returns:
+        str: The resulting text.
+    """
+    possible_inserts = re.findall(r"{{ (.+?) }}", template)
+    for ins in possible_inserts:
+        if data.get(ins):
+            template = template.replace("{{ " + ins + " }}", data[ins])
+    return template
+
+
+def gen_json_body(data: dict) -> str:
+    """
+    Generate a email body with formatted JSON.
+
+    Args:
+        data (dict): The data to include.
+
+    Returns:
+        str: The generated body text.
+    """
+    body = json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)
+    body += f"\n\nSubmission received: {make_timestamp()}"
+    return body
+
+
+def send_email(form_info: dict, data: dict, mail_client):
+    """
+    Send an email with the submitted form content.
+
+    Args:
+        form_info (dict): Information about the form.
+        data (dict): The submitted form.
+    """
+    if form_info.get("email_custom"):
+        body_text = apply_template(form_info.get("email_text_template", ""), data)
+        body_html = apply_template(form_info.get("email_html_template", ""), data)
+    else:
+        body_text = gen_json_body(data)
+        body_html = body_text.replace("\n", "<br/>")
+    mail_client.send(
+        flask_mail.Message(
+            form_info.get("email_title"),
+            body=body_text,
+            html=body_html,
+            recipients=form_info["email_recipients"],
+        )
+    )
