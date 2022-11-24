@@ -41,8 +41,10 @@ def test_gen_json_body():
         "bad_variable": "BAD",
     }
 
-    expected = ('{\n  "asd": "hit_2",\n  "bad_variable": "BAD",\n  ',
-                '"spec_val": "unique",\n  "val": "hit_1",\n  "variable": "hit_3"\n}')
+    expected = (
+        '{\n  "asd": "hit_2",\n  "bad_variable": "BAD",\n  ',
+        '"spec_val": "unique",\n  "val": "hit_1",\n  "variable": "hit_3"\n}',
+    )
 
     res = utils.gen_json_body(data)
     assert res.startswith(expected)
