@@ -162,9 +162,10 @@ def send_email(form_info: dict, data: dict, mail_client):
     """
     if form_info.get("email_custom"):
         body_text = apply_template(form_info.get("email_text_template", ""), data)
+        body_html = apply_template(form_info.get("email_html_template", ""), data)
     else:
         body_text = gen_json_body(data)
-    body_html = body_text
+        body_html = body_text.replace("\n", "<br/>")
     mail_client.send(
         flask_mail.Message(
             form_info.get("email_title"),
