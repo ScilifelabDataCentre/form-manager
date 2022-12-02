@@ -28,7 +28,7 @@ jobs:
       security-events: write
 
     concurrency:
-      group: ${{ github.ref }}-codeql
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
     strategy:
