@@ -11,7 +11,7 @@ jobs:
     if: github.repository == 'scilifelabdatacentre/form-manager'
     name: Publish Docker Image
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:
@@ -50,7 +50,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
       - name: Build and Publish
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           file: ${{ matrix.dockerfile }}
           context: .
