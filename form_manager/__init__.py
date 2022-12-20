@@ -23,6 +23,8 @@ def create_app():
     app = flask.Flask("form_manager")
     app.config.from_object("form_manager.config.Config")
     app.config.from_envvar("CONFIG_FILE", silent=True)
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
 
     @app.before_request
     def prepare():
