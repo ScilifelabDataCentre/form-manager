@@ -12,6 +12,8 @@ import pymongo
 import pytz
 import requests
 
+from jinja2 import Environment, BaseLoader
+
 
 def prepare_db(db_config: dict) -> tuple:
     """
@@ -118,10 +120,7 @@ def has_form_access(username, entry):
 
 def apply_template(template: str, data: dict) -> str:
     """
-    Fill a template with the values of the defined variables.
-
-    Variables are entered as ``{{ variable }}``.
-    Currently using simple text replacement, but may use Jinja in the future.
+    Fill a jinja style template with the values of the defined variables.
 
     Args:
         template (str): The template.
@@ -130,11 +129,8 @@ def apply_template(template: str, data: dict) -> str:
     Returns:
         str: The resulting text.
     """
-    possible_inserts = re.findall(r"{{ (.+?) }}", template)
-    for ins in possible_inserts:
-        if data.get(ins):
-            template = template.replace("{{ " + ins + " }}", data[ins])
-    return template
+    jinja_env = Environment(loader=BaseLoader()).from_string(template)
+    return jinja_env.render(**data)
 
 
 def gen_json_body(data: dict) -> str:
