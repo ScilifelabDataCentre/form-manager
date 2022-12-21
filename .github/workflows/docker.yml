@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - "more-concurrency"
   release:
     types: [published]
 jobs:
@@ -11,7 +12,7 @@ jobs:
     if: github.repository == 'scilifelabdatacentre/form-manager'
     name: Publish Docker Image
     concurrency:
-      group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}: ${{ matrix.dockerfile }}'
       cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:
