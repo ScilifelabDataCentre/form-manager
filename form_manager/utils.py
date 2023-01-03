@@ -115,6 +115,8 @@ def has_form_access(username, entry):
     Returns:
         bool: Whether the user has access.
     """
+    if not username:  # in case there somehow is an empty string in owners
+        username = False
     return username in entry["owners"]
 
 
