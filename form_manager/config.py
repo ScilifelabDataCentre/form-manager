@@ -2,7 +2,7 @@
 import os
 
 
-class Config(object):
+class Config:
     """Base config"""
 
     SITE_NAME = "Form Manager"

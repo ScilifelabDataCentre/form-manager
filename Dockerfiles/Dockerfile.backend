@@ -16,7 +16,6 @@ CMD ["flask", "run", "-h", "0.0.0.0", "--port", "5000"]
 
 FROM base as test
 
-COPY ./requirements_test.txt /requirements_test.txt
 RUN pip install pytest-cov
 COPY ./test /code/test
 CMD ["pytest", "test"]

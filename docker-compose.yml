@@ -66,6 +66,7 @@ services:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
       target: test
+    command: sh -c "pytest --color=yes --cov=./form_manager --cov-report=xml:test/coverage/report.xml"
     environment:
       DEV_LOGIN: 1
     profiles:

@@ -25,7 +25,7 @@ class MongoDatabase(dw.DataWrapper):
         return self._db["forms"].insert_one(entry)
 
     def update_form(self, entry):
-        return self._db["forms"].update_one({"_id": entry["_id"]}, {"$set": entry})
+        return self._db["forms"].update_one({"identifier": entry["identifier"]}, {"$set": entry})
 
     def delete_form(self, identifier):
         res1 = self._db["forms"].delete_one({"identifier": identifier})

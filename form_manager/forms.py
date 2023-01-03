@@ -144,7 +144,7 @@ def edit_form(identifier: str):
             "status": "success",
             "identifier": identifier,
             "type": "PATCH",
-            "url": flask.url_for("forms.edit_form", identifier=identifier, _external=True)
+            "url": flask.url_for("forms.edit_form", identifier=identifier, _external=True),
         }
     )
 

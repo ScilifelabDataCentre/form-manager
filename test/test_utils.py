@@ -1,16 +1,11 @@
 """Test functions from utils.py"""
 
+import pytest
+
 from form_manager import utils
 
-BASE_TEMPLATE = """{{ val }} random text here 12345 {{ }}.
-more text here {{ asd }} {{ val }}
-{{
-  bad_variable
-}}
-
-Text here {{ {{ spec_val }} }}
-
-{{ variable }}"""
+BASE_TEMPLATE = "{{ val }} {{asd}}"
+BAD_TEMPLATE = "{{ }}"
 
 
 def test_apply_template():
@@ -24,11 +19,9 @@ def test_apply_template():
     }
 
     res = utils.apply_template(BASE_TEMPLATE, data)
-    print(res)
-    assert res.count("hit_1") == 2
-    assert res.count("hit_2") == 1
-    assert "BAD" not in data
-    assert "unique }}" not in data
+    assert res == "hit_1 hit_2"
+    with pytest.raises(ValueError):
+        res = utils.apply_template(BAD_TEMPLATE, data)
 
 
 def test_gen_json_body():
