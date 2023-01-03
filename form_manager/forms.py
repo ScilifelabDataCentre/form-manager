@@ -5,6 +5,7 @@ from bson import ObjectId
 import flask
 import flask_mail
 
+from form_manager import data
 from . import csrf, mail, utils
 
 blueprint = flask.Blueprint("forms", __name__)  # pylint: disable=invalid-name
@@ -67,7 +68,7 @@ def validate_form(indata: dict, reference: dict) -> bool:
 @utils.login_required
 def list_forms():
     """List all forms belonging to the current user."""
-    form_info = list(flask.g.db["forms"].find({"owners": flask.session.get("email")}, {"_id": 0}))
+    form_info = flask.g.data.get_forms(flask.session["email"])
     return flask.jsonify(
         {"forms": form_info, "url": flask.url_for("forms.list_forms", _external=True)}
     )
@@ -82,7 +83,7 @@ def get_form_info(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.db["forms"].find_one({"identifier": identifier}, {"_id": 0})
+    entry = flask.g.data.get_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -103,14 +104,14 @@ def add_form():
     if not indata:
         indata = {}
     entry = form()
-    while flask.g.db["forms"].find_one({"identifier": entry["identifier"]}):
+    while flask.g.data.get_form(entry.get("identifier")):
         entry["identifier"] = utils.generate_id()
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
         flask.abort(code=400)
     entry.update(indata)
     entry["owners"] = [flask.session["email"]]
-    flask.g.db["forms"].insert_one(entry)
+    flask.g.db.add_form(entry)
     return flask.jsonify(
         {"identifier": entry["identifier"], "url": flask.url_for("forms.add_form", _external=True)}
     )
@@ -128,7 +129,7 @@ def edit_form(identifier: str):
     indata = flask.request.get_json(silent=True)
     if not indata:
         flask.abort(code=400)
-    entry = flask.g.db["forms"].find_one({"identifier": identifier})
+    entry = flask.g.data.get_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -136,8 +137,8 @@ def edit_form(identifier: str):
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
         flask.abort(code=400)
-    entry.update(indata)
-    flask.g.db["forms"].update_one({"_id": entry["_id"]}, {"$set": entry})
+        entry.update(indata)
+    flask.g.data.update_form(entry)
     return ""
 
 
@@ -150,13 +151,12 @@ def delete_form(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.db["forms"].find_one({"identifier": identifier})
+    entry = flask.g.data.get_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
         flask.abort(code=403)
-    flask.g.db["forms"].delete_one(entry)
-    flask.g.db["submissions"].delete_many({"identifier": entry["identifier"]})
+    flask.g.data.delete_form(identifier)
     return ""
 
 
@@ -169,7 +169,7 @@ def receive_submission(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    form_info = flask.g.db["forms"].find_one({"identifier": identifier})
+    form_info = flask.g.data.get_form(identifier)
     if not form_info:
         return flask.abort(code=400)
     form_submission = dict(flask.request.form)
@@ -196,7 +196,7 @@ def receive_submission(identifier: str):
         "origin": flask.request.environ.get("HTTP_ORIGIN", "-"),
     }
 
-    flask.g.db["submissions"].insert_one(to_add)
+    flask.g.data.add_submission(to_add)
 
     return flask.redirect(f"/success{redirect_args}")
 
@@ -210,7 +210,7 @@ def get_form_url(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.db["forms"].find_one({"identifier": identifier}, {"_id": 0})
+    entry = flask.g.data.get_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -234,12 +234,12 @@ def get_submissions(identifier):
     Args:
         identifier (str): The form identifier.
     """
-    form_info = flask.g.db["forms"].find_one({"identifier": identifier})
+    form_info = flask.g.data.get_form(identifier)
     if not form_info:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(code=403)
-    submissions = list(flask.g.db["submissions"].find({"identifier": identifier}))
+        flask.g.data.get_submissions(identifier)
     for submission in submissions:
         submission["id"] = str(submission["_id"])
         del submission["_id"]
@@ -261,11 +261,11 @@ def delete_submission(identifier: str, subid: str):
         identifier (str): The form identifier.
         subid (str): The submission identifier.
     """
-    form_info = flask.g.db["forms"].find_one({"identifier": identifier})
+    form_info = flask.g.data.get_form(identifier)
     if not form_info:
         flask.abort(404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(403)
-    if flask.g.db["submissions"].delete_one({"_id": ObjectId(subid)}).deleted_count != 1:
+    if flask.g.data.delete_submission(subid).deleted_count != 1:
         flask.abort(500, {"message": "Failed to delete entry"})
     return ""
