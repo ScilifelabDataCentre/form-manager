@@ -15,7 +15,7 @@ oauth = OAuth()
 csrf = flask_seasurf.SeaSurf()
 talisman = flask_talisman.Talisman()
 
-from form_manager import config, forms, user, utils  # to avoid issues with circular import
+from form_manager import config, data, forms, user, utils  # to avoid issues with circular import
 
 
 def create_app():
@@ -27,18 +27,17 @@ def create_app():
     @app.before_request
     def prepare():
         """Set up the database connection"""
-        flask.g.dbclient, flask.g.db = utils.prepare_db(flask.current_app.config["DB_CONF"])
+        flask.g.data = data.activate(flask.current_app.config["DB_CONF"])
 
     @app.after_request
     def finalize(response):
         """Finalize the response and clean up."""
         # close db connection
-        if hasattr(flask.g, "dbclient"):
-            flask.g.dbclient.close()
-            # add some headers for protection
-            response.headers["X-Frame-Options"] = "SAMEORIGIN"
-            response.headers["X-XSS-Protection"] = "1; mode=block"
-            return response
+        flask.g.data.close()
+        # add some headers for protection
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        return response
 
     if __name__ != "__main__":
         gunicorn_logger = logging.getLogger("gunicorn.error")
