@@ -30,15 +30,23 @@ All configuration options are listed in `form_manager/conf.py`. Modify that file
 A complete development environment can be activated locally by running:
 
 ```
-docker-compose up
+docker-compose --profile dev up
 ```
 
 It will set up a database, a mail catcher, and one instance each of the backend and frontend, reachable at [http://localhost:5050](http://localhost:5050). The backend and frontend instance will use your local code, adapting to your changes.
 
-
 If `FLASK_ENV` is set to `development` (done by default if you run the above command), you can log in by using the endpoint [http://localhost:5050/api/v1/development/login/linus@example.com](http://localhost:5050/api/v1/development/login/linus@example.com), where `linus@example.com` may be exchanged to any email you want to log in as.
 
 The easiest way to use development environment is to paste the url to the login endpoint in a web browser, and then open [http://localhost:5050](http://localhost:5050) to use the system.
+
+
+## Testing
+
+The tests can be run using the command:
+
+```
+docker-compose --profile testing up --exit-code-from test
+```
 
 
 ## Required Run Environment

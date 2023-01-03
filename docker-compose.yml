@@ -1,6 +1,9 @@
 version: "3.9"
 services:
   db:
+    profiles:
+      - dev
+      - testing
     image: mongo:latest
     volumes:
       - mongo-data:/data/
@@ -9,6 +12,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=mongopassword
 
   backend:
+    profiles:
+      - dev
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
@@ -27,6 +32,8 @@ services:
         target: /code/form_manager
 
   frontend:
+    profiles:
+      - dev
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.frontend
@@ -40,9 +47,11 @@ services:
         target: /code/src
 
   proxy:
-    image: nginx:alpine
+    profiles:
+      - dev
+    image: nginxinc/nginx-unprivileged:alpine
     ports:
-      - 127.0.0.1:5050:80
+      - 127.0.0.1:5050:8080
     depends_on:
       - backend
       - frontend
@@ -64,8 +73,14 @@ services:
     depends_on:
       - db
     restart: "no"
+    volumes:
+      - type: bind
+        source: ./test
+        target: /code/test
 
   mailcatcher:
+    profiles:
+      - dev
     image: sj26/mailcatcher:latest
     ports:
       - 127.0.0.1:1080:1080
