@@ -111,7 +111,7 @@ def add_form():
         flask.abort(code=400)
     entry.update(indata)
     entry["owners"] = [flask.session["email"]]
-    flask.g.db.add_form(entry)
+    flask.g.data.add_form(entry)
     return flask.jsonify(
         {"identifier": entry["identifier"], "url": flask.url_for("forms.add_form", _external=True)}
     )
@@ -164,7 +164,7 @@ def delete_form(identifier: str):
 @blueprint.route("/<identifier>/incoming", methods=["POST"])
 def receive_submission(identifier: str):
     """
-    Save a form submission to the db.
+    Save a form submission to the data backend.
 
     Args:
         identifier (str): The form identifier.
