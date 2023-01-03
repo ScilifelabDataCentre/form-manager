@@ -1,4 +1,4 @@
-/* eslint-env node */
+1/* eslint-env node */
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -91,13 +91,13 @@ module.exports = configure(function (/* ctx */) {
     devServer: {
       open: true, // opens browser window automatically
       https: false,
-      port: 9000,
-      proxy: {
-        '/api': {
-          target: 'http://localhost:5050/',
-          changeOrigin: true,
-        }
-      },
+      port: 5050,
+      // proxy: {
+      //   '/api': {
+      //     target: 'http://localhost:5050/api/',
+      //     changeOrigin: true,
+      //   }
+      // },
 
     },
 
