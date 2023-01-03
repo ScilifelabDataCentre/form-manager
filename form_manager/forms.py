@@ -137,9 +137,16 @@ def edit_form(identifier: str):
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
         flask.abort(code=400)
-        entry.update(indata)
+    entry.update(indata)
     flask.g.data.update_form(entry)
-    return ""
+    return flask.jsonify(
+        {
+            "status": "success",
+            "identifier": identifier,
+            "type": "PATCH",
+            "url": flask.url_for("forms.edit_form", identifier=identifier, _external=True)
+        }
+    )
 
 
 @blueprint.route("/<identifier>", methods=["DELETE"])
