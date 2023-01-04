@@ -1,0 +1,27 @@
+name: Backend Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    concurrency:
+      group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run backend tests
+        run: docker-compose --profile testing up --exit-code-from test
+
+      - name: Publish coverage to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./test/coverage/report.xml
