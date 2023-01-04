@@ -8,11 +8,11 @@ import secrets
 
 import flask
 import flask_mail
+import jinja2
+from jinja2.exceptions import TemplateSyntaxError
 import pymongo
 import pytz
 import requests
-
-from jinja2 import Environment, BaseLoader
 
 
 def make_timestamp():
@@ -44,7 +44,7 @@ def verify_recaptcha(secret: str, response: str):
 
 
 def login_required(func):
-    """Check whether user is logged in, ottherwise return 403."""
+    """Check whether user is logged in, otherwise return 403."""
 
     @functools.wraps(func)
     def inner(*args, **kwargs):
@@ -71,8 +71,8 @@ def has_form_access(username, entry):
     Returns:
         bool: Whether the user has access.
     """
-    if not username:  # in case there somehow is an empty string in owners
-        username = False
+    if not username:  # in case there is somehow an empty string in owners
+        return False
     return username in entry["owners"]
 
 
@@ -84,10 +84,16 @@ def apply_template(template: str, data: dict) -> str:
         template (str): The template.
         data (dict): The variables to use.
 
+    Raises:
+        ValueError: The template application failed.
+
     Returns:
         str: The resulting text.
     """
-    jinja_env = Environment(loader=BaseLoader()).from_string(template)
+    try:
+        jinja_env = jinja2.Environment(loader=jinja2.BaseLoader()).from_string(template)
+    except TemplateSyntaxError as exc:
+        raise ValueError("Unable to use the template in Jinja") from exc
     return jinja_env.render(**data)
 
 
@@ -115,8 +121,15 @@ def send_email(form_info: dict, data: dict, mail_client):
         data (dict): The submitted form.
     """
     if form_info.get("email_custom"):
-        body_text = apply_template(form_info.get("email_text_template", ""), data)
-        body_html = apply_template(form_info.get("email_html_template", ""), data)
+        try:
+            body_text = apply_template(form_info.get("email_text_template", ""), data)
+            body_html = apply_template(form_info.get("email_html_template", ""), data)
+        except ValueError:
+            body_text = (
+                "There are error(s) in the email template(s), using the default JSON format\n\n"
+            )
+            body_text += gen_json_body(data)
+            body_html = body_text.replace("\n", "<br/>")
     else:
         body_text = gen_json_body(data)
         body_html = body_text.replace("\n", "<br/>")
