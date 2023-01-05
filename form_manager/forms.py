@@ -244,7 +244,7 @@ def fetch_submissions(identifier):
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(code=403)
-        submissions = flask.g.data.fetch_submissions(identifier)
+    submissions = flask.g.data.fetch_submissions(identifier)
     for submission in submissions:
         submission["id"] = str(submission["_id"])
         del submission["_id"]
