@@ -38,7 +38,7 @@ def verify_recaptcha(secret: str, response: str):
     rec_check = requests.post(
         "https://www.google.com/recaptcha/api/siteverify",
         {"secret": secret, "response": response},
-        timeout = 5,
+        timeout=5,
     )
     return bool(rec_check.json().get("success"))
 
