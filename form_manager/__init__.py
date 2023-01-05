@@ -75,7 +75,6 @@ def create_app(testing=False):
         return flask.Response(status=200)
 
     if os.environ.get("DEV_LOGIN") or app.testing:
-        print("asd")
         activate_dev(app)
 
     return app

@@ -5,6 +5,8 @@ services:
       - dev
       - testing
     image: mongo:latest
+    # comment the following line if you want output from the database
+    command: --quiet --logpath /dev/null
     volumes:
       - mongo-data:/data/
     environment:

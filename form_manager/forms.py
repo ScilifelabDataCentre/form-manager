@@ -1,11 +1,6 @@
 """Endpoints related to forms."""
-import pprint
-from bson import ObjectId
-
 import flask
-import flask_mail
 
-from form_manager import data
 from . import csrf, mail, utils
 
 blueprint = flask.Blueprint("forms", __name__)  # pylint: disable=invalid-name
@@ -46,7 +41,7 @@ def validate_form(indata: dict, reference: dict) -> bool:
         if prop not in reference:
             flask.current_app.logger.debug("Extra property")
             return False
-        if not type(indata[prop]) == type(reference[prop]):
+        if not isinstance(indata[prop], type(reference[prop])):
             flask.current_app.logger.debug("Wrong property type")
             return False
     if "identifier" in indata:
@@ -68,7 +63,7 @@ def validate_form(indata: dict, reference: dict) -> bool:
 @utils.login_required
 def list_forms():
     """List all forms belonging to the current user."""
-    form_info = flask.g.data.get_forms(flask.session["email"])
+    form_info = flask.g.data.fetch_forms(flask.session["email"])
     return flask.jsonify(
         {"forms": form_info, "url": flask.url_for("forms.list_forms", _external=True)}
     )
@@ -76,14 +71,14 @@ def list_forms():
 
 @blueprint.route("/<identifier>", methods=["GET"])
 @utils.login_required
-def get_form_info(identifier: str):
+def fetch_form_info(identifier: str):
     """
     Get information about a form.
 
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.data.get_form(identifier)
+    entry = flask.g.data.fetch_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -91,7 +86,7 @@ def get_form_info(identifier: str):
     return flask.jsonify(
         {
             "form": entry,
-            "url": flask.url_for("forms.get_form_info", identifier=identifier, _external=True),
+            "url": flask.url_for("forms.fetch_form_info", identifier=identifier, _external=True),
         }
     )
 
@@ -104,14 +99,15 @@ def add_form():
     if not indata:
         indata = {}
     entry = form()
-    while flask.g.data.get_form(entry.get("identifier")):
+    while flask.g.data.fetch_form(entry.get("identifier")):
         entry["identifier"] = utils.generate_id()
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
         flask.abort(code=400)
     entry.update(indata)
     entry["owners"] = [flask.session["email"]]
-    flask.g.data.add_form(entry)
+    if not flask.g.data.add_form(entry):
+        flask.abort(500, {"message": "Failed to add form"})
     return flask.jsonify(
         {"identifier": entry["identifier"], "url": flask.url_for("forms.add_form", _external=True)}
     )
@@ -129,7 +125,7 @@ def edit_form(identifier: str):
     indata = flask.request.get_json(silent=True)
     if not indata:
         flask.abort(code=400)
-    entry = flask.g.data.get_form(identifier)
+    entry = flask.g.data.fetch_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -138,7 +134,8 @@ def edit_form(identifier: str):
         flask.current_app.logger.debug("Validation failed")
         flask.abort(code=400)
     entry.update(indata)
-    flask.g.data.update_form(entry)
+    if not flask.g.data.edit_form(entry):
+        flask.abort(500, {"message": "Failed to edit form"})
     return flask.jsonify(
         {
             "status": "success",
@@ -158,12 +155,13 @@ def delete_form(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.data.get_form(identifier)
+    entry = flask.g.data.fetch_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
         flask.abort(code=403)
-    flask.g.data.delete_form(identifier)
+    if not flask.g.data.delete_form(identifier):
+        flask.abort(500, {"message": "Failed to delete form"})
     return ""
 
 
@@ -176,7 +174,7 @@ def receive_submission(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    form_info = flask.g.data.get_form(identifier)
+    form_info = flask.g.data.fetch_form(identifier)
     if not form_info:
         return flask.abort(code=400)
     form_submission = dict(flask.request.form)
@@ -210,14 +208,14 @@ def receive_submission(identifier: str):
 
 @blueprint.route("/<identifier>/url", methods=["GET"])
 @utils.login_required
-def get_form_url(identifier: str):
+def fetch_form_url(identifier: str):
     """
     Get the submission url for a form.
 
     Args:
         identifier (str): The form identifier.
     """
-    entry = flask.g.data.get_form(identifier)
+    entry = flask.g.data.fetch_form(identifier)
     if not entry:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], entry):
@@ -234,26 +232,26 @@ def get_form_url(identifier: str):
 
 @blueprint.route("/<identifier>/submission", methods=["GET"])
 @utils.login_required
-def get_submissions(identifier):
+def fetch_submissions(identifier):
     """
     List form submissions.
 
     Args:
         identifier (str): The form identifier.
     """
-    form_info = flask.g.data.get_form(identifier)
+    form_info = flask.g.data.fetch_form(identifier)
     if not form_info:
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(code=403)
-        flask.g.data.get_submissions(identifier)
+    submissions = flask.g.data.fetch_submissions(identifier)
     for submission in submissions:
         submission["id"] = str(submission["_id"])
         del submission["_id"]
     return flask.jsonify(
         {
             "submissions": submissions,
-            "url": flask.url_for("forms.get_submissions", identifier=identifier, _external=True),
+            "url": flask.url_for("forms.fetch_submissions", identifier=identifier, _external=True),
         }
     )
 
@@ -268,11 +266,11 @@ def delete_submission(identifier: str, subid: str):
         identifier (str): The form identifier.
         subid (str): The submission identifier.
     """
-    form_info = flask.g.data.get_form(identifier)
+    form_info = flask.g.data.fetch_form(identifier)
     if not form_info:
         flask.abort(404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(403)
-    if flask.g.data.delete_submission(subid).deleted_count != 1:
+    if not flask.g.data.delete_submission(subid):
         flask.abort(500, {"message": "Failed to delete entry"})
     return ""

@@ -3,14 +3,12 @@ from datetime import datetime
 import functools
 import json
 import os
-import re
 import secrets
 
 import flask
 import flask_mail
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
-import pymongo
 import pytz
 import requests
 
@@ -38,7 +36,9 @@ def verify_recaptcha(secret: str, response: str):
         bool: Whether the check passed
     """
     rec_check = requests.post(
-        "https://www.google.com/recaptcha/api/siteverify", {"secret": secret, "response": response}
+        "https://www.google.com/recaptcha/api/siteverify",
+        {"secret": secret, "response": response},
+        timeout=5,
     )
     return bool(rec_check.json().get("success"))
 

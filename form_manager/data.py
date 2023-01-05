@@ -3,7 +3,10 @@
 from form_manager import mongo
 
 
-def activate(config):
-    data_backend = "mongodb"
-    if data_backend == "mongodb":
-        return mongo.MongoDatabase(config)
+def activate(config: dict):
+    """Activate the chosen data source."""
+    data_source_name = "mongodb"
+    data_source = None
+    if data_source_name == "mongodb":
+        data_source = mongo.MongoDatabase(config)
+    return data_source
