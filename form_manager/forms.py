@@ -41,7 +41,7 @@ def validate_form(indata: dict, reference: dict) -> bool:
         if prop not in reference:
             flask.current_app.logger.debug("Extra property")
             return False
-        if not type(indata[prop]) == type(reference[prop]):
+        if not isinstance(indata[prop], type(reference[prop])):
             flask.current_app.logger.debug("Wrong property type")
             return False
     if "identifier" in indata:
