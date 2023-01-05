@@ -1,11 +1,6 @@
 """Endpoints related to forms."""
-import pprint
-from bson import ObjectId
-
 import flask
-import flask_mail
 
-from form_manager import data
 from . import csrf, mail, utils
 
 blueprint = flask.Blueprint("forms", __name__)  # pylint: disable=invalid-name
@@ -249,7 +244,7 @@ def fetch_submissions(identifier):
         flask.abort(code=404)
     if not utils.has_form_access(flask.session["email"], form_info):
         flask.abort(code=403)
-        flask.g.data.fetch_submissions(identifier)
+        submissions = flask.g.data.fetch_submissions(identifier)
     for submission in submissions:
         submission["id"] = str(submission["_id"])
         del submission["_id"]

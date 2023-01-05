@@ -45,6 +45,7 @@ def oidc_authorize():
 
 @blueprint.route("/logout")
 def logout():
+    """Log out a user by clearing the session cookie."""
     flask.session.clear()
     flask.session.permanent = False
     return flask.redirect("/")

@@ -1,5 +1,6 @@
 """Implementation of DataSource using MongoDB as data backend."""
 
+from bson import ObjectId
 import pymongo
 
 from form_manager import data_source as ds
@@ -86,7 +87,7 @@ class MongoDatabase(ds.DataSource):
             bool: Whether the form was deleted successfully.
         """
         res1 = self._db["forms"].delete_one({"identifier": identifier})
-        res2 = self._db["submissions"].delete_many({"identifier": identifier})
+        self._db["submissions"].delete_many({"identifier": identifier})
         return bool(res1.deleted_count)
 
     def fetch_submissions(self, form_identifier):
@@ -99,7 +100,7 @@ class MongoDatabase(ds.DataSource):
         Returns:
             list: The fetched submissions.
         """
-        return list(flask.g.db["submissions"].find({"identifier": form_identifier}))
+        return list(self._db["submissions"].find({"identifier": form_identifier}))
 
     def add_submission(self, data):
         """
