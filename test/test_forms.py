@@ -40,7 +40,7 @@ def test_add_list_delete_form(client):
     response = client.post("/api/v1/form")
     assert response.status_code == 200
     identifier = response.json["identifier"]
-    assert helpers.data_source.get_form(identifier)
+    assert helpers.data_source.fetch_form(identifier)
 
     response = client.get(f"/api/v1/form/{identifier}")
     assert response.status_code == 200
@@ -48,7 +48,7 @@ def test_add_list_delete_form(client):
 
     response = client.delete(f"/api/v1/form/{identifier}")
     assert response.status_code == 200
-    assert not helpers.data_source.get_form(identifier)
+    assert not helpers.data_source.fetch_form(identifier)
 
 
 def test_add_list_delete_form_not_allowed(client):
