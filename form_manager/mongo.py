@@ -2,10 +2,10 @@
 
 import pymongo
 
-from form_manager import data_wrapper as dw
+from form_manager import data_source as ds
 
 
-class MongoDatabase(dw.DataWrapper):
+class MongoDatabase(ds.DataSource):
     def __init__(self, config):
         self._client = pymongo.MongoClient(
             host=config.get("host"),
