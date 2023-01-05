@@ -67,7 +67,7 @@ class DataSource:
 
     def delete_form(self, identifier: str) -> bool:
         """
-        Delete the ``identifier`` form.
+        Delete the ``identifier`` form and any related submissions.
 
         Args:
             identifier (dict): The form identifier.
@@ -79,7 +79,7 @@ class DataSource:
 
     def fetch_submissions(self, form_identifier: str) -> list:
         """
-        Fetch all submissions belonging to the provided form
+        Fetch all submissions belonging to the provided form.
 
         Args:
             form_identifier (str): The identifier for the form.
