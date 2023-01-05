@@ -95,7 +95,7 @@ def fetch_form_info(identifier: str):
 @utils.login_required
 def add_form():
     """Add a new form for the current user."""
-    indata = flask.request.fetch_json(silent=True)
+    indata = flask.request.get_json(silent=True)
     if not indata:
         indata = {}
     entry = form()
@@ -122,7 +122,7 @@ def edit_form(identifier: str):
     Args:
         identifier (str): The form identifier.
     """
-    indata = flask.request.fetch_json(silent=True)
+    indata = flask.request.get_json(silent=True)
     if not indata:
         flask.abort(code=400)
     entry = flask.g.data.fetch_form(identifier)
