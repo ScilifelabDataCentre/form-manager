@@ -14,6 +14,12 @@ FROM base as dev
 CMD ["flask", "run", "-h", "0.0.0.0", "--port", "5000"]
 
 
+FROM base as test
+
+RUN pip install pytest-cov
+COPY ./test /code/test
+CMD ["pytest", "test"]
+
 FROM base as production
 
 RUN pip install gunicorn

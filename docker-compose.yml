@@ -1,6 +1,9 @@
 version: "3.9"
 services:
   db:
+    profiles:
+      - dev
+      - testing
     image: mongo:latest
     volumes:
       - mongo-data:/data/
@@ -9,13 +12,15 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=mongopassword
 
   backend:
+    profiles:
+      - dev
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
       target: dev
     environment:
       FLASK_DEBUG: 1
-      FLASK_ENV: development
+      DEV_LOGIN: 1
       FLASK_APP: form_manager
       TZ: Europe/Stockholm
     depends_on:
@@ -27,6 +32,8 @@ services:
         target: /code/form_manager
 
   frontend:
+    profiles:
+      - dev
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.frontend
@@ -40,9 +47,11 @@ services:
         target: /code/src
 
   proxy:
-    image: nginx:alpine
+    profiles:
+      - dev
+    image: nginxinc/nginx-unprivileged:alpine
     ports:
-      - 127.0.0.1:5050:80
+      - 127.0.0.1:5050:8080
     depends_on:
       - backend
       - frontend
@@ -52,7 +61,27 @@ services:
         source: ./Dockerfiles/nginx.conf.dev
         target: /etc/nginx/conf.d/default.conf
 
+  test:
+    build:
+      context: ./
+      dockerfile: Dockerfiles/Dockerfile.backend
+      target: test
+    command: sh -c "pytest --color=yes --cov=./form_manager --cov-report=xml:test/coverage/report.xml"
+    environment:
+      DEV_LOGIN: 1
+    profiles:
+      - testing
+    depends_on:
+      - db
+    restart: "no"
+    volumes:
+      - type: bind
+        source: ./test
+        target: /code/test
+
   mailcatcher:
+    profiles:
+      - dev
     image: sj26/mailcatcher:latest
     ports:
       - 127.0.0.1:1080:1080

@@ -18,9 +18,11 @@ talisman = flask_talisman.Talisman()
 from form_manager import config, data, forms, user, utils  # to avoid issues with circular import
 
 
-def create_app():
+def create_app(testing=False):
     """Construct the core application."""
     app = flask.Flask("form_manager")
+    if testing:
+        app.config["TESTING"] = True
     app.config.from_object("form_manager.config.Config")
     app.config.from_envvar("CONFIG_FILE", silent=True)
 
@@ -57,9 +59,9 @@ def create_app():
         client_kwargs={"scope": "openid profile email"},
     )
 
-    talisman.init_app(app)
-
-    csrf.init_app(app)
+    if not app.testing:
+        talisman.init_app(app)
+        csrf.init_app(app)
 
     if app.config["REVERSE_PROXY"]:
         app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -72,7 +74,8 @@ def create_app():
     def heartbeat():
         return flask.Response(status=200)
 
-    if app.env == "development":
+    if os.environ.get("DEV_LOGIN") or app.testing:
+        print("asd")
         activate_dev(app)
 
     return app
@@ -89,4 +92,4 @@ def activate_dev(app):
     def dev_login(email: str):
         """Force login as email."""
         flask.session["email"] = email
-        return flask.Response(status=200)
+        return f"Logged in as {email}"
