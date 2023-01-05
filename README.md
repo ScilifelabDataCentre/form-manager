@@ -1,6 +1,12 @@
 Form Manager
 ============
 
+[![Backend Tests](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/backend-tests.yml)
+[![codecov](https://codecov.io/github/ScilifelabDataCentre/form-manager/branch/main/graph/badge.svg?token=MQX98Q3NYU)](https://codecov.io/github/ScilifelabDataCentre/form-manager)
+[![Black formatting](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/python-black.yml/badge.svg)](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/python-black.yml)
+[![CodeQL](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/codeql-analysis.yml)
+[![Trivy Scan](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/trivy.yaml/badge.svg)](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/trivy.yaml)
+
 Form Manager is a simple system (backend/frontend) to receive web form `POST` submissions.
 
 Login is performed using OpenID connect. There is no internal user account management.
