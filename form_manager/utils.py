@@ -91,7 +91,11 @@ def apply_template(template: str, data: dict) -> str:
         str: The resulting text.
     """
     try:
-        jinja_env = jinja2.Environment(loader=jinja2.BaseLoader()).from_string(template)
+        jinja_env = jinja2.Environment(loader=jinja2.BaseLoader(),
+                                       autoescape=jinja2.select_autoescape(
+                                           default_for_string=True,
+                                           default=True,
+                                       )).from_string(template)
     except TemplateSyntaxError as exc:
         raise ValueError("Unable to use the template in Jinja") from exc
     return jinja_env.render(**data)
