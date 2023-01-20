@@ -1,15 +1,8 @@
 <template>
-<q-page class="fit column justify-center items-center content-center">
-  <q-btn
-    label="Back to Form Browser"
-    icon="arrow_back"
-    class="q-my-lg"
-    color="primary"
-    :to="{ name: 'FormBrowser' }"
-    />
-  
+<div>
   <q-card
     v-if="Object.keys(urlInfo).length > 0"
+    flat
     class="q-my-sm">
     <q-card-section>
       &lt;form action="{{ urlInfo.submission_url }}" method="{{ urlInfo.method }}" accept-charset="utf-8"&gt;
@@ -17,6 +10,7 @@
   </q-card>
   
   <q-table
+    flat
     class="q-my-lg"
     :title="formInfo.title"
     :rows="listingType === 'submission' ? rawSubmissions : questions"
@@ -131,7 +125,7 @@
     color="secondary"
     @click="jsonToClipboard(listingType === 'submission' ? rawSubmissions : questions)"
     />
-</q-page>
+</div>
 </template>
 
 <script>

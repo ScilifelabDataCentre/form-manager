@@ -3,7 +3,6 @@
   <div>
     <q-input
       v-model="newValue"
-      dense
       stack-label
       hide-bottom-space
       outlined
