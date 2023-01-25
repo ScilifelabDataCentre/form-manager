@@ -39,7 +39,7 @@ export default route(function (/* { store, ssrContext } */) {
 	      next()
 	  }
 	  else if (to.name === 'Login')
-	    next({name: 'FormBrowser'})
+	    next({name: 'FormHandler'})
 	  else
 	    next()
 	})
@@ -53,7 +53,7 @@ export default route(function (/* { store, ssrContext } */) {
 	  next()
       }
       else if (to.name === 'Login')
-	next({name: 'FormBrowser'})
+	next({name: 'FormHandler'})
       else
 	next()
     }
