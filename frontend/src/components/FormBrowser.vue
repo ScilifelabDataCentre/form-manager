@@ -12,13 +12,6 @@
     :no-results-label="filter + ' does not match any entries'"
     >
     <template #top-right>
-      <q-btn
-	class="q-mx-sm"
-	dense
-	round
-	outline
-	icon="add"
-	@click="addForm" />      
       <q-input
 	v-model="filter"
 	rounded
@@ -78,9 +71,13 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    refreshNeeded: {
+      type: Boolean,
+      default: false,
+    },
   },
 
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'refresh-done'],
 
   data () {
     return {
@@ -140,6 +137,14 @@ export default defineComponent({
     }
   },
 
+  watch: {
+    refreshNeeded (newValue) {
+      if (newValue === true) {
+	this.getEntries();
+      }
+    },
+  },
+
   mounted () {
     this.getEntries();
   },
@@ -155,12 +160,10 @@ export default defineComponent({
       .catch((err) => {
 	this.loadError = true;
       })
-      .finally(() => this.loading = false);
-    },
-    addForm() {
-      this.$api
-	.post('/form', {}, {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
-        .then(() => this.getEntries())
+	.finally(() => {
+	  this.loading = false
+	  this.$emit('refresh-done')
+	});
     },
     selectForm(props) {
       this.$emit('update:modelValue', props.row.identifier);
