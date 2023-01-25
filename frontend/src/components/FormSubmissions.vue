@@ -66,12 +66,14 @@
           >
           {{ col.value }}
         </q-td>
-	<q-td>
+	<q-td auto-width>
 	  <q-btn
 	    v-if="listingType === 'submission'"
 	    color="red"
 	    icon="delete"
 	    flat
+	    round
+            dense
 	    @click="confirmDelete(props.row.id)"
 	    />
 	</q-td>
