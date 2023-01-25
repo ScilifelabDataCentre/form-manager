@@ -2,7 +2,7 @@
 <div>
   <q-card
     v-if="Object.keys(urlInfo).length > 0"
-    flat
+    bordered
     class="q-my-sm">
     <q-card-section>
       &lt;form action="{{ urlInfo.submission_url }}" method="{{ urlInfo.method }}" accept-charset="utf-8"&gt;
@@ -72,7 +72,7 @@
 	    color="red"
 	    icon="delete"
 	    flat
-	    @click="deleteSubmission(props.row.id)"
+	    @click="confirmDelete(props.row.id)"
 	    />
 	</q-td>
       </q-tr>
@@ -125,6 +125,11 @@
     color="secondary"
     @click="jsonToClipboard(listingType === 'submission' ? rawSubmissions : questions)"
     />
+
+  <delete-dialog
+    v-model="showDeleteWarning"
+    entry-type="submission"
+    @delete-confirmed="deleteSubmission" />
 </div>
 </template>
 
@@ -132,8 +137,15 @@
 import { defineComponent } from 'vue'
 import { copyToClipboard } from 'quasar'
 
+import DeleteDialog from 'components/DeleteDialog.vue'
+
 export default defineComponent({
   name: 'FormSubmissions',
+
+  components: {
+    'delete-dialog': DeleteDialog,
+  },
+  
   props: {
     identifier: {
       type: String,
@@ -194,6 +206,8 @@ export default defineComponent({
       urlInfo: {},
       listingType: 'submission',
       showCopyInfo: false,
+      toDelete: {},
+      showDeleteWarning: false,
     }
   },
 
@@ -263,9 +277,15 @@ export default defineComponent({
 	.catch((err) => this.urlError = true)
       	.finally(() => this.urlLoading = false);
     },
-    deleteSubmission(subid) {
+
+    confirmDelete(entry) {
+      this.toDelete = entry;
+      this.showDeleteWarning = true;
+    },
+
+    deleteSubmission() {
       this.$axios
-	.delete('/api/v1/form/' + this.identifier + '/submission/' + subid,
+	.delete('/api/v1/form/' + this.identifier + '/submission/' + this.toDelete,
 	       {headers: {'X-CSRFToken': this.$q.cookies.get('_csrf_token')}})
         .then(() => this.getEntry())
 	.catch(() => console.log('Failed to delete entry ' + subid))
