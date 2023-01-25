@@ -162,51 +162,9 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-  <q-dialog v-model="showDeleteWarning">
-    <q-card>
-      <q-card-section class="row items-center">
-        <q-avatar icon="fas fa-trash" color="alert" text-color="primary" />
-        <span class="q-ml-sm">Are you sure you want to delete this form?</span>
-      </q-card-section>
-      
-      <q-card-actions align="right">
-        <q-btn
-	  flat
-          :loading="isDeleting"
-          label="Delete"
-          color="negative"
-          class="user-edit-confirm-delete"
-          @click="deleteForm" />
-        <q-btn
-	  v-close-popup
-	  flat
-	  label="Cancel"
-	  color="grey-7" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-  <q-dialog v-model="showAbandonWarning">
-    <q-card>
-      <q-card-section class="row items-center">
-        <q-avatar icon="fas fa-trash" color="alert" text-color="primary" />
-        <span class="q-ml-sm">Are you sure you want to abandon your changes?</span>
-      </q-card-section>
-      
-      <q-card-actions align="right">
-        <q-btn
-	  v-close-popup
-	  flat
-          label="Yes"
-          color="negative"
-          class="user-edit-confirm-delete"
-          @click="deleteForm" />
-        <q-btn
-	  flat
-	  label="Continue editing"
-	  color="grey-7" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+  <delete-dialog
+    v-model="showDeleteWarning"
+    @delete-confirmed="deleteForm" />
 </div>
 </template>
 
@@ -214,10 +172,12 @@
 import { defineComponent } from 'vue'
 
 import StringListEditor from 'components/StringListEditor.vue'
+import DeleteDialog from 'components/DeleteDialog.vue'
 
 export default defineComponent({
   name: 'FormConfig',
   components: {
+    'delete-dialog': DeleteDialog,
     'str-list-editor': StringListEditor,
   },
 
