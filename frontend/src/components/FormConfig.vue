@@ -112,32 +112,18 @@
       <q-item-section>
 	<div class="items-end">
 	  <q-btn
-	    flat
-	    round
-	    dense
 	    size="md"
 	    icon="check"
+	    label="Save"
 	    color="positive"
 	    :loading="editData.saving"
 	    @click="save" />
 	  <q-btn
-	    flat
-	    round
-	    dense
-	    bg-color="positive"
-	    size="md"
-	    icon="refresh"
-	    color="accent"
-	    @click="getEntry" />
-	  <q-btn
-	    flat
-	    round
-	    dense
 	    class="q-ml-md"
 	    bg-color="positive"
 	    size="md"
 	    icon="delete"
-	    label="Delete form"
+	    label="Delete"
 	    color="negative"
 	    @click="confirmDelete(props)" />
 	  <span v-show="editData.saveError" class="text-negative">Save failed</span>
@@ -145,23 +131,6 @@
       </q-item-section>
     </q-item>
   </q-list>
-  <q-dialog v-model="showEditTemplateDialog">
-    <q-card style="min-width: 600px">
-      
-      <q-card-actions align="right">
-        <q-btn
-	  flat
-          label="Keep"
-          color="positive"
-          @click="saveTemplate" />
-        <q-btn
-	  v-close-popup
-	  flat
-	  label="Cancel"
-	  color="grey-7" />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
   <delete-dialog
     v-model="showDeleteWarning"
     @delete-confirmed="deleteForm" />
@@ -265,23 +234,6 @@ export default defineComponent({
 	  this.saveError = true
 	  this.saving = false
 	})
-    },
-
-    cancelEdit(entry) {
-      entry.expand = false;
-      delete this.editData[entry.key];
-    },
-    openTemplateDialog(entry, type) {
-      this.showEditTemplateDialog = true;
-      let prop = "email_" + type + "_template";
-      this.currentEditTemplate = entry;
-      console.log(this.currentEditTemplate)
-      this.currentEditTemplateType = prop;
-      this.currentEditTemplateText = entry[prop];
-    },
-    saveTemplate() {
-      this.currentEditTemplate[this.currentEditTemplateType] = this.currentEditTemplateText;
-      this.showEditTemplateDialog = false;
     },
   },
 })
