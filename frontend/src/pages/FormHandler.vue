@@ -58,6 +58,7 @@
     </transition>
   </div>
   <q-btn
+    v-if="selected.length === 0"
     class="q-ma-md"
     icon="add"
     label="Add new form"
@@ -68,7 +69,7 @@
     <q-card>
       <q-card-section class="row items-center">
         <q-avatar icon="warning" text-color="negative" />
-        <span class="q-ml-sm">Are you sure you want to abandon you changes to the form?</span>
+        <span class="q-ml-sm">Are you sure you want to abandon any changes to the form?</span>
       </q-card-section>
       
       <q-card-actions align="right">
