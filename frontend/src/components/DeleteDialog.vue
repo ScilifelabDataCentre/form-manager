@@ -9,6 +9,7 @@
       <q-card-actions align="right">
         <q-btn
 	  flat
+	  v-close-popup
           label="Delete"
           color="negative"
 	  class="confirm-delete"
