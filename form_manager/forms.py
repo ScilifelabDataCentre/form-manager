@@ -198,10 +198,10 @@ def receive_submission(identifier: str):
     # the user is reported success, while the entry is silently dropped
     try:
         if utils.is_blacklisted(form_submission, form_info["blacklist"]):
-            flask.current_app.logging.warning("Submission stopped by blacklist")
-            flask.redirect(f"/success{redirect_args}")
+            flask.current_app.logger.warning("Submission stopped by blacklist")
+            return flask.redirect(f"/success{redirect_args}")
     except ValueError as err:
-        flask.current_app.logging.error(f"Issue in format of blacklist: {err}")
+        flask.current_app.logger.error(f"Issue in format of blacklist: {err}")
 
     # Evaluate Recaptcha
     if form_info.get("recaptcha_secret"):
