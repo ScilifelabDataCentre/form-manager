@@ -3,6 +3,7 @@ from datetime import datetime
 import functools
 import json
 import os
+import re
 import secrets
 
 import flask
@@ -147,3 +148,51 @@ def send_email(form_info: dict, data: dict, mail_client):
             recipients=form_info["email_recipients"],
         )
     )
+
+
+def is_blacklisted(data: dict, blacklist: list):
+    """
+    Check whether the blacklist rules apply to the data.
+
+    The blacklist contains rules in the format:
+    ``
+    [
+      {
+        "key_name": "regular expression",
+        "key_name2": "regular expression2",
+      },
+      {
+        "key_name3": "regular expression",
+      },
+    ]
+    ``
+    The value at ``data[key_name]`` will be matched against the regular expression.
+    Entries within a ``dict`` are considered AND, i.e. all must match the values
+    to be considered a match to blacklist the submission.
+    Different ``list`` entries are considered OR and the submission will be blacklisted
+    if any ``list`` entry is a match.
+
+    Args:
+        data (dict): The data to check.
+        blacklist (list): The blacklist rules.
+
+    Raises:
+
+
+    Returns:
+        bool: Whether the data is blacklisted.
+    """
+    for and_entry in blacklist:
+        matches = 0
+        for key in and_entry:
+            if key not in data:
+                continue
+            try:
+                if re.search(and_entry[key], data[key]):
+                    matches += 1
+            except re.error as exc:
+                raise ValueError("Bad regex in blacklist") from exc
+        if matches == len(and_entry):
+            return True
+
+    return False
