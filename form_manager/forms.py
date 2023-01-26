@@ -19,6 +19,7 @@ def form():
         "email_text_template": "",
         "owners": [],
         "redirect": "",
+        "blacklist": [],
     }
 
 
@@ -184,6 +185,13 @@ def receive_submission(identifier: str):
     else:
         redirect_args = ""
 
+    # Evaluate blacklist; if the submission match a blacklist,
+    # the user is reported success, while the entry is silently dropped
+    try:
+        if utils.is_blacklisted(form_submission, form_info["blacklist"]):
+            flask.redirect(f"/success{redirect_args}")
+
+    # Evaluate Recaptcha
     if form_info.get("recaptcha_secret"):
         if "g-recaptcha-response" not in form_submission or not utils.verify_recaptcha(
             form_info["recaptcha_secret"], form_submission["g-recaptcha-response"]
