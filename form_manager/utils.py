@@ -191,7 +191,7 @@ def is_blacklisted(data: dict, blacklist: list):
                 if re.search(and_entry[key], data[key]):
                     matches += 1
             except re.error as exc:
-                raise ValueError("Bad regex in blacklist") from exc
+                raise ValueError(exc) from exc
         if matches == len(and_entry):
             return True
 

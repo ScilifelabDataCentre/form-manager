@@ -201,7 +201,7 @@ def receive_submission(identifier: str):
             flask.current_app.logging.warning("Submission stopped by blacklist")
             flask.redirect(f"/success{redirect_args}")
     except ValueError as err:
-        flask.current_app.logging.error(f"Issue in format of blacklist")
+        flask.current_app.logging.error(f"Issue in format of blacklist: {err}")
 
     # Evaluate Recaptcha
     if form_info.get("recaptcha_secret"):
