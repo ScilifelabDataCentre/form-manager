@@ -42,3 +42,68 @@ def test_gen_json_body():
     res = utils.gen_json_body(data)
     assert res.startswith(expected)
     assert "Submission received:" in res
+
+
+def test_is_blacklisted_match():
+    """Confirm that is_blacklisted detects a match."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key2": "[0-9]"}]
+
+    assert utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_no_match():
+    """Confirm that is_blacklisted does not report a match when there is none."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key2": "[a-zA-Z]"}]
+
+    assert not utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_key_not_present():
+    """Confirm that is_blacklisted does not have issues with non-existing keys."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"characters": "[a-zA-Z]"}]
+
+    assert not utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_key_or_match():
+    """Confirm that is_blacklisted detects a match when one part of an or bl matches."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key2": "[a-zA-Z]"}, {"key": "[a-zA-Z]"}]
+
+    assert utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_key_or_no_match():
+    """Confirm that is_blacklisted detects no match when neither or statement is a match."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key2": "[a-zA-Z]"}, {"key": "[1-9]"}]
+
+    assert not utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_key_and_no_match():
+    """Confirm that is_blacklisted detects no match when not both statements are correct in AND."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key": "[a-zA-Z]", "key2": "[a-zA-Z]"}]
+
+    assert not utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_key_and_match():
+    """Confirm that is_blacklisted detects a match when both statements in AND are matching."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key": "[a-zA-Z]", "key2": "[1-9]"}]
+
+    assert utils.is_blacklisted(bl_data, bl)
+
+
+def test_is_blacklisted_bad_regex():
+    """Confirm that is_blacklisted detects a match when both statements in AND are matching."""
+    bl_data = {"key": "value", "key2": "156"}
+    bl = [{"key": "(?)"}]
+
+    with pytest.raises(ValueError):
+        utils.is_blacklisted(bl_data, bl)

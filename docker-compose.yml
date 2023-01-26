@@ -80,6 +80,9 @@ services:
       - type: bind
         source: ./test
         target: /code/test
+      - type: bind
+        source: ./form_manager
+        target: /code/form_manager
 
   mailcatcher:
     profiles:

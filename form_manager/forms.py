@@ -19,6 +19,7 @@ def form():
         "email_text_template": "",
         "owners": [],
         "redirect": "",
+        "blacklist": [],
     }
 
 
@@ -64,9 +65,18 @@ def validate_form(indata: dict, reference: dict) -> bool:
 def list_forms():
     """List all forms belonging to the current user."""
     form_info = flask.g.data.fetch_forms(flask.session["email"])
-    return flask.jsonify(
-        {"forms": form_info, "url": flask.url_for("forms.list_forms", _external=True)}
-    )
+    outgoing = {"forms": [], "url": flask.url_for("forms.list_forms", _external=True)}
+    for form in form_info:
+        outgoing["forms"].append(
+            {
+                "identifier": form["identifier"],
+                "title": form["title"],
+                "recaptcha": bool(form["recaptcha_secret"]),
+                "email": bool(form["email_recipients"]),
+                "redirect": bool(form["redirect"]),
+            }
+        )
+    return flask.jsonify(outgoing)
 
 
 @blueprint.route("/<identifier>", methods=["GET"])
@@ -124,15 +134,15 @@ def edit_form(identifier: str):
     """
     indata = flask.request.get_json(silent=True)
     if not indata:
-        flask.abort(code=400)
+        flask.abort(400)
     entry = flask.g.data.fetch_form(identifier)
     if not entry:
-        flask.abort(code=404)
+        flask.abort(404)
     if not utils.has_form_access(flask.session["email"], entry):
-        flask.abort(code=403)
+        flask.abort(403)
     if not validate_form(indata, entry):
         flask.current_app.logger.debug("Validation failed")
-        flask.abort(code=400)
+        flask.abort(400, {"message": "Bad data"})
     entry.update(indata)
     if not flask.g.data.edit_form(entry):
         flask.abort(500, {"message": "Failed to edit form"})
@@ -176,7 +186,7 @@ def receive_submission(identifier: str):
     """
     form_info = flask.g.data.fetch_form(identifier)
     if not form_info:
-        return flask.abort(code=400)
+        return flask.abort(400)
     form_submission = dict(flask.request.form)
 
     if form_info.get("redirect"):
@@ -184,6 +194,16 @@ def receive_submission(identifier: str):
     else:
         redirect_args = ""
 
+    # Evaluate blacklist; if the submission match a blacklist,
+    # the user is reported success, while the entry is silently dropped
+    try:
+        if utils.is_blacklisted(form_submission, form_info["blacklist"]):
+            flask.current_app.logger.warning("Submission stopped by blacklist")
+            return flask.redirect(f"/success{redirect_args}")
+    except ValueError as err:
+        flask.current_app.logger.error(f"Issue in format of blacklist: {err}")
+
+    # Evaluate Recaptcha
     if form_info.get("recaptcha_secret"):
         if "g-recaptcha-response" not in form_submission or not utils.verify_recaptcha(
             form_info["recaptcha_secret"], form_submission["g-recaptcha-response"]
@@ -191,8 +211,8 @@ def receive_submission(identifier: str):
             return flask.redirect(f"/failure{redirect_args}")
         del form_submission["g-recaptcha-response"]
 
-    if form_info.get("email_recipients"):
-        utils.send_email(form_info, form_submission, mail)
+        if form_info.get("email_recipients"):
+            utils.send_email(form_info, form_submission, mail)
 
     to_add = {
         "submission": form_submission,
