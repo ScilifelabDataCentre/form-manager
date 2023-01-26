@@ -65,9 +65,18 @@ def validate_form(indata: dict, reference: dict) -> bool:
 def list_forms():
     """List all forms belonging to the current user."""
     form_info = flask.g.data.fetch_forms(flask.session["email"])
-    return flask.jsonify(
-        {"forms": form_info, "url": flask.url_for("forms.list_forms", _external=True)}
-    )
+    outgoing = {"forms": [], "url": flask.url_for("forms.list_forms", _external=True)}
+    for form in form_info:
+        outgoing["forms"].append(
+            {
+                "identifier": form["identifier"],
+                "title": form["title"],
+                "recaptcha": bool(form["recaptcha_secret"]),
+                "email": bool(form["email_recipients"]),
+                "redirect": bool(form["redirect"]),
+            }
+        )
+    return flask.jsonify(outgoing)
 
 
 @blueprint.route("/<identifier>", methods=["GET"])
