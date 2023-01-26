@@ -206,7 +206,7 @@ def receive_submission(identifier: str):
     # Evaluate Recaptcha
     if form_info.get("recaptcha_secret"):
         if "g-recaptcha-response" not in form_submission or not utils.verify_recaptcha(
-                form_info["recaptcha_secret"], form_submission["g-recaptcha-response"]
+            form_info["recaptcha_secret"], form_submission["g-recaptcha-response"]
         ):
             return flask.redirect(f"/failure{redirect_args}")
         del form_submission["g-recaptcha-response"]
