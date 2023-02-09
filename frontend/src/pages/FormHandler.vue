@@ -1,5 +1,8 @@
 <template>
-<q-page class="flex items-start justify-center q-mt-xl">
+<q-page
+  padding
+  class="col justify-center q-mt-xl"
+  >
   <div v-if="selected.length === 0">
     <transition
       appear
@@ -12,54 +15,54 @@
 	@refresh-done="refreshNeeded = false" />
     </transition>
   </div>
-  <div v-else>
-    <transition
-      appear
-      enter-active-class="animated fadeIn"
-      leave-active-class="animated fadeOut"
-      >
-      <div style="min-width: 850px">
-	<div class="q-my-md">
-	  <q-btn
-	    rounded
-	    icon="arrow_back"
-	    label="Choose another form"
-	    size="l"
-	    @click="getLeaveConfirmation" />
-	</div>
-	<q-card>
-	  <q-tabs
-	    v-model="tab"
-	    dense
-	    class="text-grey"
-	    active-color="primary"
-	    indicator-color="primary"
-	    align="justify"
-	    >
-	    <q-tab name="config" label="Configuration" />
-	    <q-tab name="submissions" label="Submissions" />
-	  </q-tabs>
-	  
-	  <q-separator />
-	  
-	  <q-tab-panels v-model="tab" animated>
-	    <q-tab-panel name="config">
-	      <form-config
-		:identifier="selected"
-		@form-deleted="leaveForm" />
-	    </q-tab-panel>
-	    
-	    <q-tab-panel name="submissions">
-	      <form-submissions :identifier="selected" />
-	    </q-tab-panel>
-	  </q-tab-panels>
-	</q-card>
+  <transition
+    v-else
+    appear
+    enter-active-class="animated fadeIn"
+    leave-active-class="animated fadeOut"
+    >
+    <div class="col">
+      <div class="q-my-md">
+	<q-btn
+	  rounded
+	  class="col-shrink"
+	  icon="arrow_back"
+	  label="Choose another form"
+	  size="l"
+	  @click="getLeaveConfirmation" />
       </div>
-    </transition>
-  </div>
+      <q-card>
+	<q-tabs
+	  v-model="tab"
+	  dense
+	  class="text-grey"
+	  active-color="primary"
+	  indicator-color="primary"
+	  align="justify"
+	  >
+	  <q-tab name="config" label="Configuration" />
+	  <q-tab name="submissions" label="Submissions" />
+	</q-tabs>
+	
+	<q-separator />
+	
+	<q-tab-panels v-model="tab" animated>
+	  <q-tab-panel name="config">
+	    <form-config
+	      :identifier="selected"
+	      @form-deleted="leaveForm" />
+	  </q-tab-panel>
+	  
+	  <q-tab-panel name="submissions">
+	    <form-submissions :identifier="selected" />
+	  </q-tab-panel>
+	</q-tab-panels>
+      </q-card>
+    </div>
+  </transition>
   <q-btn
     v-if="selected.length === 0"
-    class="q-ma-md"
+    class="q-ma-md col-shrink"
     icon="add"
     label="Add new form"
     color="primary"
@@ -113,12 +116,18 @@ export default defineComponent({
       tab: 'config',
       refreshNeeded: false,
       showLeaveFormDialog: false,
+      formChanged: true,
     }
   },
 
   methods: {
     getLeaveConfirmation () {
-      this.showLeaveFormDialog = true
+      if (this.formChanged) {
+	this.showLeaveFormDialog = true
+      }
+      else {
+	this.leaveForm()
+      }
     },
 
     leaveForm () {

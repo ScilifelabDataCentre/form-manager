@@ -1,6 +1,5 @@
 <template>
   <q-table
-    style="max-width: 97% ;min-width: 850px"
     title="Forms"
     :rows="entries"
     :columns="columns"
