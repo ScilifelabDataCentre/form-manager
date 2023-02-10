@@ -23,15 +23,22 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+    <cookie-notifier />
   </q-layout>
 </template>
 
 <script>
 import { defineComponent, ref } from 'vue'
 import { useUserStore } from 'stores/user'
+import CookieNotifier from 'components/CookieNotifier.vue'
 
 export default defineComponent({
   name: 'MainLayout',
+
+  components: {
+    'cookie-notifier': CookieNotifier,
+  },
+  
   setup() {
     const userStore = useUserStore()
     const version = process.env.VERSION
