@@ -28,7 +28,7 @@ name: 'CookieNotifier',
   props: {
     note: {
       type: String,
-      default: "This system uses a cookie to manage your session.",
+      default: 'This system uses cookies to manage your session.',
     },
   },
 
