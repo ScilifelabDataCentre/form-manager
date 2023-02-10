@@ -1,6 +1,15 @@
 <template>
-<div v-if="Object.keys(editData).length > 0">
-  <q-list dense>
+<div>
+  <q-inner-loading
+    class="q-ma-l"
+    :showing="loading"
+    color="primary"
+    />
+  <q-list
+    v-if="Object.keys(editData).length > 0"
+    dense
+    >
+
     <q-item>
       <q-item-section>
 	<q-input
@@ -110,6 +119,11 @@
     </q-item>
     <q-item>
       <q-item-section>
+	<blacklist-editor v-model="editData.email_recipients"/>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
 	<div class="items-end">
 	  <q-btn
 	    size="md"
@@ -142,12 +156,14 @@ import { defineComponent } from 'vue'
 
 import StringListEditor from 'components/StringListEditor.vue'
 import DeleteDialog from 'components/DeleteDialog.vue'
+import BlacklistEditor from 'components/BlacklistEditor.vue'
 
 export default defineComponent({
   name: 'FormConfig',
   components: {
     'delete-dialog': DeleteDialog,
     'str-list-editor': StringListEditor,
+    'blacklist-editor': BlacklistEditor,
   },
 
   props: {
@@ -158,7 +174,7 @@ export default defineComponent({
   },
 
   emits: ['form-deleted'],
-
+  
   data () {
     return {
       entry: {},
@@ -169,13 +185,14 @@ export default defineComponent({
       loadError: false,
       showEditTemplateDialog: false,
       showDeleteWarning: false,
+      formModified: false,
     }
   },
-
-  computed : {
+  
+  computed: {
     dataChanged: {
       get () {
-	return this.entry != this.editData;
+	return this.entry !== this.editData;
       }
     }
   },
@@ -192,6 +209,7 @@ export default defineComponent({
         .then((response) => {
 	  this.entry = response.data['form']
 	  this.editData = JSON.parse(JSON.stringify(this.entry))
+	  this.formModified = false
 	})
       .catch((err) => {
 	this.loadError = true;
