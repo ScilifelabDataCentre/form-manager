@@ -211,8 +211,8 @@ def receive_submission(identifier: str):
             return flask.redirect(f"/failure{redirect_args}")
         del form_submission["g-recaptcha-response"]
 
-        if form_info.get("email_recipients"):
-            utils.send_email(form_info, form_submission, mail)
+    if form_info.get("email_recipients"):
+        utils.send_email(form_info, form_submission, mail)
 
     to_add = {
         "submission": form_submission,
