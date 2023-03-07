@@ -1,26 +1,24 @@
-name: Trivy Scan
+name: Trivy scheduled scans
+
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  schedule:
+    - cron: '6 11 * * *'
+
 jobs:
-  run-trivy-scan:
-    name: Trivy Scan
-    runs-on: ubuntu-22.04
-    concurrency:
-      group: ${{ github.ref }}-trivy
-      cancel-in-progress: true
+  scan:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    name: Build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Run Trivy vulnerability scanner with rootfs command
-        uses: aquasecurity/trivy-action@master
+      - name: Run Trivy vulnerability scanner - backend
+        uses: aquasecurity/trivy-action@0.9.2
         with:
-          scan-type: 'rootfs'
-          scan-ref: '.'
-          ignore-unfixed: true
+          image-ref: 'ghcr.io/${{ github.repository_owner }}form-manager-backend:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -29,3 +27,18 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
+          category: trivy-cron
+
+      - name: Run Trivy vulnerability scanner - frontend
+        uses: aquasecurity/trivy-action@0.9.2
+        with:
+          image-ref: 'ghcr.io/${{ github.repository_owner }}form-manager-frontend:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: trivy-cron
