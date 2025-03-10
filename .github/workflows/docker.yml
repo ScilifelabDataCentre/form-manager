@@ -1,15 +1,16 @@
 ---
-name: Publish Docker Image
+name: Publish Docker Images
 on:
   push:
     branches:
       - main
+      - develop
   release:
     types: [published]
 jobs:
   push_to_registry:
     if: github.repository == 'scilifelabdatacentre/form-manager'
-    name: Publish Docker Image
+    name: Publish Docker Images
     concurrency:
       group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}: ${{ matrix.dockerfile }}'
       cancel-in-progress: true
