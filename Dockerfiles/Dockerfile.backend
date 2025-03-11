@@ -1,4 +1,7 @@
-FROM python:3.11-alpine as base
+###############################################
+# Base Image
+###############################################
+FROM python:3.11-alpine AS base
 
 RUN apk update && apk upgrade
 RUN apk add gcc musl-dev libffi-dev
@@ -6,23 +9,40 @@ COPY ./requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 COPY ./form_manager /code/form_manager
 WORKDIR /code/
-ENV PYTHONPATH /code
+ENV PYTHONPATH=/code
 
 
-FROM base as dev
+###############################################
+# Development Image
+###############################################
+FROM base AS dev
 
 CMD ["flask", "run", "-h", "0.0.0.0", "--port", "5000"]
 
 
-FROM base as test
+###############################################
+# Test Image
+###############################################
+FROM base AS test
 
 RUN pip install pytest-cov
 COPY ./test /code/test
 CMD ["pytest", "test"]
 
-FROM base as production
+
+###############################################
+# Production Image
+###############################################
+FROM base AS production
+
+# Create user to avoid running application as root
+# TODO Test in dev first
+ARG USER=form-manager
+RUN useradd -u 1000 $USER
+RUN chown -R $USER:$USER /home/$USER/
+USER $USER
 
 RUN pip install gunicorn
-ENV GUNICORN_CMD_ARGS "--bind=0.0.0.0:8000 --workers=2 --thread=4 --worker-class=gthread --forwarded-allow-ips='*' --access-logfile -"
+ENV GUNICORN_CMD_ARGS="--bind=0.0.0.0:8000 --workers=2 --thread=4 --worker-class=gthread --forwarded-allow-ips='*' --access-logfile -"
 WORKDIR /code/form_manager
 CMD ["gunicorn", "app:app"]
