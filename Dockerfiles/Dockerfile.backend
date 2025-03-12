@@ -1,7 +1,7 @@
 ###############################################
 # Base Image
 ###############################################
-FROM python:3.11-alpine AS base
+FROM python:3.13-alpine AS base
 
 RUN apk update && apk upgrade
 RUN apk add gcc musl-dev libffi-dev
