@@ -10,6 +10,7 @@ dependencies = [
     "flask-mail>=0.10.0",
     "flask-seasurf>=2.0.0",
     "flask-talisman>=1.1.0",
+    "gunicorn>=23.0.0",
     "jinja2>=3.1.6",
     "pymongo>=4.11.2",
     "pytz>=2025.1",
