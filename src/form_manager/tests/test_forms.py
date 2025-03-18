@@ -1,6 +1,6 @@
 """Form-related tests."""
 
-import test as helpers
+import tests as helpers
 
 
 def test_list_forms_anon(client):
