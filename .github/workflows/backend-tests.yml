@@ -24,4 +24,4 @@ jobs:
       - name: Publish coverage to codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./test/coverage/report.xml
+          files: ./src/form_manager/tests/coverage/report.xml
