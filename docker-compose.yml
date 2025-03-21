@@ -18,19 +18,18 @@ services:
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
-      target: dev
+    entrypoint: flask run
     environment:
       FLASK_DEBUG: 1
       DEV_LOGIN: 1
-      FLASK_APP: form_manager
       TZ: Europe/Stockholm
     depends_on:
       - db
     restart: on-failure
     volumes:
       - type: bind
-        source: ./form_manager
-        target: /code/form_manager
+        source: ./src/form_manager
+        target: /app/form_manager
 
   frontend:
     profiles:
