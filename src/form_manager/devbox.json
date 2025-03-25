@@ -4,9 +4,13 @@
     "python@3.13",
     "uv@latest"
   ],
+  "env": {
+    "PYTHONPATH": "./"},
   "shell": {
     "init_hook": [
-      ". $VENV_DIR/bin/activate"
+      ". $VENV_DIR/bin/activate",
+      "echo Running uv sync...",
+      "uv sync"
     ],
     "scripts": {}
   }
