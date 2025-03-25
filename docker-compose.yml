@@ -4,8 +4,7 @@ services:
       - dev
       - testing
     image: mongo:latest
-    # comment the following line if you want output from the database
-    command: --quiet --logpath /dev/null
+    command: --quiet --logpath /dev/null  # comment the following line if you want output from the database
     volumes:
       - mongo-data:/data/
     environment:
@@ -62,25 +61,22 @@ services:
         target: /etc/nginx/conf.d/default.conf
 
   test:
+    profiles:
+      - testing
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
       target: test
-    command: sh -c "pytest --color=yes --cov=./form_manager --cov-report=xml:test/coverage/report.xml"
+    command: sh -c "pytest --color=yes --cov=./ --cov-report=xml:./tests/coverage/report.xml tests/"
     environment:
       DEV_LOGIN: 1
-    profiles:
-      - testing
     depends_on:
       - db
     restart: "no"
     volumes:
       - type: bind
-        source: ./test
-        target: /code/test
-      - type: bind
-        source: ./form_manager
-        target: /code/form_manager
+        source: ./src/form_manager
+        target: /app/form_manager
 
   mailcatcher:
     profiles:
