@@ -4,7 +4,7 @@ import copy
 import pytest
 
 from form_manager import create_app
-import tests as helpers
+import form_manager.tests as helpers
 
 
 @pytest.fixture(scope="function")

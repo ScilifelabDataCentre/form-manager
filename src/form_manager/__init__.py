@@ -15,7 +15,7 @@ oauth = OAuth()
 csrf = flask_seasurf.SeaSurf()
 talisman = flask_talisman.Talisman()
 
-from form_manager import config, data, forms, user, utils  # to avoid issues with circular import
+from form_manager import data, forms, user  # to avoid issues with circular import
 
 
 def create_app(testing=False):
