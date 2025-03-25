@@ -1,4 +1,5 @@
 """Test setup."""
+
 import copy
 
 import pytest

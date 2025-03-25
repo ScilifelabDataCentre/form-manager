@@ -10,12 +10,12 @@ import flask_seasurf
 from authlib.integrations.flask_client import OAuth
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from form_manager import data, forms, user  # to avoid issues with circular import
+
 mail = flask_mail.Mail()
 oauth = OAuth()
 csrf = flask_seasurf.SeaSurf()
 talisman = flask_talisman.Talisman()
-
-from form_manager import data, forms, user  # to avoid issues with circular import
 
 
 def create_app(testing=False):

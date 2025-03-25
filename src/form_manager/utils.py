@@ -1,4 +1,5 @@
 """General helper functions."""
+
 from datetime import datetime
 import functools
 import json
@@ -22,7 +23,9 @@ def make_timestamp():
         datetime: The current time.
     """
     fmt = "%a, %d %b %Y %H:%M:%S %Z"
-    return datetime.now(pytz.timezone(os.environ.get("TZ", "Europe/Stockholm"))).strftime(fmt)
+    return datetime.now(
+        pytz.timezone(os.environ.get("TZ", "Europe/Stockholm"))
+    ).strftime(fmt)
 
 
 def verify_recaptcha(secret: str, response: str):
@@ -132,9 +135,7 @@ def send_email(form_info: dict, data: dict, mail_client):
             body_text = apply_template(form_info.get("email_text_template", ""), data)
             body_html = apply_template(form_info.get("email_html_template", ""), data)
         except ValueError:
-            body_text = (
-                "There are error(s) in the email template(s), using the default JSON format\n\n"
-            )
+            body_text = "There are error(s) in the email template(s), using the default JSON format\n\n"
             body_text += gen_json_body(data)
             body_html = body_text.replace("\n", "<br/>")
     else:

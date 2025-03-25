@@ -8,7 +8,7 @@ def login(email, client):
 
 
 def logout(client):
-    return client.get(f"/api/v1/user/logout")
+    return client.get("/api/v1/user/logout")
 
 
 USERS = ["test@example.com", "test2@example.com"]
