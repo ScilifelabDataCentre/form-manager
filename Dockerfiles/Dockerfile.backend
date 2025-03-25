@@ -17,8 +17,6 @@ SHELL ["sh", "-exc"]
 # Avoid interactive prompts during package operations.
 ENV DEBIAN_FRONTEND=noninteractive
 
-### Start build preparation -- this should be a separate build container for better reuse
-
 # Copy `uv` from the third-party image into the build container
 COPY --from=ghcr.io/astral-sh/uv:0.6.7 /uv /usr/local/bin/uv
 
@@ -33,9 +31,6 @@ ENV UV_LINK_MODE=copy \
     UV_PYTHON=python3.13 \
     UV_PROJECT_ENVIRONMENT=/app
 
-### End build preparation -- this is where the app Dockerfile should start.
-
-
 # Synchronise DEPENDENCIES without the application itself.
 # This layer is cached until uv.lock or pyproject.toml change, which are only
 # temporarily mounted into the build container since we don't need them in production.
@@ -49,9 +44,31 @@ RUN --mount=type=cache,target=/root/.cache \
 
 
 ###############################################################################
-#                                Runtime Stage                                #
+#                                 Test Stage                                  #
 ###############################################################################
-FROM python:3.13-slim AS runtime
+FROM build AS test
+
+# Add application virtual environment to PATH and declare PYTHONPATH.
+ENV PATH=/app/bin:$PATH \
+    PYTHONPATH=/app
+
+# Copy NON-PACKAGED application source directory into test container.
+COPY ./src/form_manager/ /app/form_manager/
+
+# Switch to application working directory.
+WORKDIR /app/form_manager
+
+# Synchronise dependencies including the dev ones.
+RUN uv sync \
+    --locked \
+    --dev \
+    --no-install-project
+
+
+###############################################################################
+#                         Runtime Stage - Production                          #
+###############################################################################
+FROM python:3.13-slim AS production
 
 # Sets default shell to `sh -exc`.
 SHELL ["sh", "-exc"]
@@ -81,8 +98,8 @@ RUN chmod +x /docker-entrypoint.sh
 COPY --from=build --chown=app:app /app /app
 
 # Copy NON-PACKAGED application into runtime container.
-COPY --chown=app:app ../src/form_manager/*.py /app/form_manager/
+COPY --chown=app:app ./src/form_manager/*.py /app/form_manager/
 
-# Set user to `app` and working directory to `/app`
+# Switch to non-root user and to application working directory.
 USER app
 WORKDIR /app/form_manager
