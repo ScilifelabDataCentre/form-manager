@@ -17,7 +17,7 @@ SHELL ["sh", "-exc"]
 # Avoid interactive prompts during package operations.
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy `uv` from the third-party image into the build container
+# Copy `uv` from the third-party image into the build container.
 COPY --from=ghcr.io/astral-sh/uv:0.6.7 /uv /usr/local/bin/uv
 
 # - Silence uv complaining about not being able to use hard links,
@@ -44,15 +44,15 @@ RUN --mount=type=cache,target=/root/.cache \
 
 
 ###############################################################################
-#                                 Test Stage                                  #
+#                             Development Image                               #
 ###############################################################################
-FROM build AS test
+FROM build AS dev
 
 # Add application virtual environment to PATH and declare PYTHONPATH.
 ENV PATH=/app/bin:$PATH \
     PYTHONPATH=/app
 
-# Copy NON-PACKAGED application source directory into test container.
+# Copy NON-PACKAGED application source directory into dev container.
 COPY ./src/form_manager/ /app/form_manager/
 
 # Switch to application working directory.

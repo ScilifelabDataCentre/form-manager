@@ -1,53 +1,64 @@
-###############################################
-# Base Image
-###############################################
-# TODO 23 is the new LTS version
-FROM node:18-alpine AS base
+# syntax=docker/dockerfile:1
 
-RUN yarn global add @quasar/cli
+###############################################################################
+#                               Base Image                                    #
+###############################################################################
+FROM node:22-slim AS base
 
-COPY ./frontend/package.json /package.json
-COPY ./frontend/yarn.lock /yarn.lock
-WORKDIR /
-RUN yarn install
+# Sets default shell to `sh -exc`:
+# -e  exit on error
+# -x  write commands to standard error
+# -c  read commands from the command_string operand
+SHELL ["sh", "-exc"]
 
-COPY ./frontend /code
-RUN mv /node_modules /code/
-WORKDIR /code
+# Declare global bin directory for pnpm.
+ENV PNPM_HOME="/pnpm"
+
+# Add pnpm global bin directory to PATH.
+ENV PATH="$PNPM_HOME:$PATH"
+
+# Enable corepack to handle package managers.
+#RUN npm install --global corepack@latest
+RUN corepack enable pnpm
+
+# Add Quasar CLI.
+RUN pnpm add -g @quasar/cli
+
+# Switch to application working directory.
+WORKDIR /app
+
+# Install dependencies without the application itself.
+# This layer is cached until package.json or pnpm-lock.yaml change.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    --mount=type=bind,source=frontend/package.json,target=package.json \
+    --mount=type=bind,source=frontend/pnpm-lock.yaml,target=pnpm-lock.yaml \
+    pnpm install --frozen-lockfile
+
+# Copy project directory into build container.
+COPY ./frontend /app
 
 
-###############################################
-# Builder Image
-###############################################
+###############################################################################
+#                              Build Stage                                    #
+###############################################################################
 FROM base AS build
 
+# Define build-time variable and environment variable.
 ARG version
 ENV VERSION=$version
 
-RUN quasar build
+# Build Quasar application.
+RUN quasar build \
+    --mode spa \
+    --dist-dir dist/spa
 
 
-###############################################
-# Development Image
-###############################################
-FROM base AS dev
-
-CMD ["quasar", "dev"]
-
-
-###############################################
-# Production Image
-###############################################
+###############################################################################
+#                         Runtime Stage - Production                          #
+###############################################################################
 FROM nginxinc/nginx-unprivileged:alpine AS production
 
-# Create user to avoid running application as root
-# TODO Test in dev first
-ARG USER=form-manager
-RUN useradd -u 1000 $USER
-RUN chown -R $USER:$USER /home/$USER/
-USER $USER
-
-COPY --from=build /code/dist/spa/ /usr/share/nginx/html/
+COPY --from=build /app/dist/spa/ /usr/share/nginx/html/
 COPY ./Dockerfiles/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080

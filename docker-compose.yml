@@ -17,7 +17,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
-    entrypoint: flask run
+      target: dev
+    entrypoint: flask run --host 0.0.0.0 --port 5000
     environment:
       FLASK_DEBUG: 1
       DEV_LOGIN: 1
@@ -36,14 +37,15 @@ services:
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.frontend
-      target: dev
+      target: base
+    entrypoint: quasar dev
     restart: on-failure
     environment:
       VERSION: "dev"
     volumes:
       - type: bind
         source: ./frontend/src
-        target: /code/src
+        target: /app/src
 
   proxy:
     profiles:
@@ -66,7 +68,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
-      target: test
+      target: dev
     command: sh -c "pytest --color=yes --cov=./ --cov-report=xml:./tests/coverage/report.xml tests/"
     environment:
       DEV_LOGIN: 1
