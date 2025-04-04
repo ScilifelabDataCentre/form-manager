@@ -5,15 +5,14 @@
 
   "env": {
     "DEVBOX_COREPACK_ENABLED": "true",
-    "PATH": "$PWD/node_modules/.bin/:$PATH",
-    "npm_config_cache": "$PWD/.npm/"
+    "PATH": "$PWD/node_modules/.bin/:$PATH"
   },
 
   "shell": {
     "init_hook": [
-	    "echo '\nRunning npm install...'",
-	    "npm install --no-fund --loglevel warn",
-	    "echo 'Done :)\n'"
+	    "echo '\nRunning pnpm install...'",
+	    "pnpm install",
+	    "echo '\nDone :)\n'"
     ],
     "scripts": {
     }
