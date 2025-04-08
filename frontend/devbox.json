@@ -1,5 +1,5 @@
 {
-  "$schema":  "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
 
   "packages": ["nodejs@22"],
 
@@ -10,11 +10,10 @@
 
   "shell": {
     "init_hook": [
-	    "echo '\nRunning pnpm install...'",
-	    "pnpm install",
-	    "echo '\nDone :)\n'"
+      "echo '\nRunning pnpm install...'",
+      "pnpm install",
+      "echo '\nDone :)\n'"
     ],
-    "scripts": {
-    }
+    "scripts": {}
   }
 }

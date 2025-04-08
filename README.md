@@ -8,9 +8,10 @@ Form Manager
 [![Trivy Scan](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/trivy.yaml/badge.svg)](https://github.com/ScilifelabDataCentre/form-manager/actions/workflows/trivy.yaml)
 
 > [!CAUTION]
-> Form Manager was initially created for Pathogens Portal's needs as a static site.
->
-> For other services, if you know you need forms in advance, do not default to using Form Manager.
+> **Form Manager was initially created for Pathogens Portal's needs as a static site.
+> For other services, if you know you need forms in advance, do not default to using Form Manager.**
+
+# 
 
 Form Manager is a simple system (backend/frontend) to receive web form `POST` submissions.
 

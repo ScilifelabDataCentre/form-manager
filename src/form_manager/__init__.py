@@ -70,6 +70,7 @@ def create_app(testing=False):
     with app.app_context():
         from form_manager.forms import blueprint as forms_blueprint
         from form_manager.user import blueprint as user_blueprint
+
         app.register_blueprint(forms_blueprint, url_prefix="/api/v1/form")
         app.register_blueprint(user_blueprint, url_prefix="/api/v1/user")
 
