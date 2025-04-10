@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run backend tests
-        run: docker-compose --profile testing up --exit-code-from test
+        run: docker compose --profile testing up --exit-code-from test
 
       - name: Publish coverage to codecov
         uses: codecov/codecov-action@v3
