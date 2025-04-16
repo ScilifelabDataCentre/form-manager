@@ -1,8 +1,0 @@
-authlib
-Flask
-Flask-Mail
-flask-seasurf
-flask-talisman
-pymongo
-requests
-pytz

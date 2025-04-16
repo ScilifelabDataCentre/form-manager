@@ -1,10 +1,11 @@
 """Test setup."""
+
 import copy
 
 import pytest
 
 from form_manager import create_app
-import test as helpers
+import form_manager.tests as helpers
 
 
 @pytest.fixture(scope="function")

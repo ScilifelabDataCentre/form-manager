@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "packages": [
+    "python@3.13",
+    "uv@latest"
+  ],
+  "env": {
+    "PYTHONPATH": "./"
+  },
+  "shell": {
+    "init_hook": [
+      ". $VENV_DIR/bin/activate",
+      "echo Running uv sync...",
+      "uv sync"
+    ],
+    "scripts": {}
+  }
+}

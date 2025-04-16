@@ -10,12 +10,13 @@ import flask_seasurf
 from authlib.integrations.flask_client import OAuth
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from form_manager import data
+
+
 mail = flask_mail.Mail()
 oauth = OAuth()
 csrf = flask_seasurf.SeaSurf()
 talisman = flask_talisman.Talisman()
-
-from form_manager import config, data, forms, user, utils  # to avoid issues with circular import
 
 
 def create_app(testing=False):
@@ -66,8 +67,12 @@ def create_app(testing=False):
     if app.config["REVERSE_PROXY"]:
         app.wsgi_app = ProxyFix(app.wsgi_app)
 
-    app.register_blueprint(forms.blueprint, url_prefix="/api/v1/form")
-    app.register_blueprint(user.blueprint, url_prefix="/api/v1/user")
+    with app.app_context():
+        from form_manager.forms import blueprint as forms_blueprint
+        from form_manager.user import blueprint as user_blueprint
+
+        app.register_blueprint(forms_blueprint, url_prefix="/api/v1/form")
+        app.register_blueprint(user_blueprint, url_prefix="/api/v1/user")
 
     @app.route("/api/v1/heartbeat", methods=["GET"])
     @talisman(force_https=False)

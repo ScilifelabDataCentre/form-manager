@@ -1,12 +1,10 @@
-version: "3.9"
 services:
   db:
     profiles:
       - dev
       - testing
     image: mongo:latest
-    # comment the following line if you want output from the database
-    command: --quiet --logpath /dev/null
+    command: --quiet --logpath /dev/null  # comment the following line if you want output from the database
     volumes:
       - mongo-data:/data/
     environment:
@@ -20,18 +18,18 @@ services:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
       target: dev
+    entrypoint: flask run --host 0.0.0.0 --port 5000
     environment:
       FLASK_DEBUG: 1
       DEV_LOGIN: 1
-      FLASK_APP: form_manager
       TZ: Europe/Stockholm
     depends_on:
       - db
     restart: on-failure
     volumes:
       - type: bind
-        source: ./form_manager
-        target: /code/form_manager
+        source: ./src/form_manager
+        target: /app/form_manager
 
   frontend:
     profiles:
@@ -39,14 +37,15 @@ services:
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.frontend
-      target: dev
+      target: base
+    entrypoint: quasar dev
     restart: on-failure
     environment:
       VERSION: "dev"
     volumes:
       - type: bind
         source: ./frontend/src
-        target: /code/src
+        target: /app/src
 
   proxy:
     profiles:
@@ -64,25 +63,22 @@ services:
         target: /etc/nginx/conf.d/default.conf
 
   test:
+    profiles:
+      - testing
     build:
       context: ./
       dockerfile: Dockerfiles/Dockerfile.backend
-      target: test
-    command: sh -c "pytest --color=yes --cov=./form_manager --cov-report=xml:test/coverage/report.xml"
+      target: dev
+    command: sh -c "pytest --color=yes --cov=./ --cov-report=xml:./tests/coverage/report.xml tests/"
     environment:
       DEV_LOGIN: 1
-    profiles:
-      - testing
     depends_on:
       - db
     restart: "no"
     volumes:
       - type: bind
-        source: ./test
-        target: /code/test
-      - type: bind
-        source: ./form_manager
-        target: /code/form_manager
+        source: ./src/form_manager
+        target: /app/form_manager
 
   mailcatcher:
     profiles:

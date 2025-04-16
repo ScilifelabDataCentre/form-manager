@@ -1,4 +1,5 @@
 """Endpoints related to forms."""
+
 import flask
 
 from . import csrf, mail, utils
@@ -96,7 +97,9 @@ def fetch_form_info(identifier: str):
     return flask.jsonify(
         {
             "form": entry,
-            "url": flask.url_for("forms.fetch_form_info", identifier=identifier, _external=True),
+            "url": flask.url_for(
+                "forms.fetch_form_info", identifier=identifier, _external=True
+            ),
         }
     )
 
@@ -119,7 +122,10 @@ def add_form():
     if not flask.g.data.add_form(entry):
         flask.abort(500, {"message": "Failed to add form"})
     return flask.jsonify(
-        {"identifier": entry["identifier"], "url": flask.url_for("forms.add_form", _external=True)}
+        {
+            "identifier": entry["identifier"],
+            "url": flask.url_for("forms.add_form", _external=True),
+        }
     )
 
 
@@ -151,7 +157,9 @@ def edit_form(identifier: str):
             "status": "success",
             "identifier": identifier,
             "type": "PATCH",
-            "url": flask.url_for("forms.edit_form", identifier=identifier, _external=True),
+            "url": flask.url_for(
+                "forms.edit_form", identifier=identifier, _external=True
+            ),
         }
     )
 
@@ -271,7 +279,9 @@ def fetch_submissions(identifier):
     return flask.jsonify(
         {
             "submissions": submissions,
-            "url": flask.url_for("forms.fetch_submissions", identifier=identifier, _external=True),
+            "url": flask.url_for(
+                "forms.fetch_submissions", identifier=identifier, _external=True
+            ),
         }
     )
 

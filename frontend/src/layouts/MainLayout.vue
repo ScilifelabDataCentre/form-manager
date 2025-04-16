@@ -2,21 +2,19 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title>
-          Form Manager
-        </q-toolbar-title>
+        <q-toolbar-title> Form Manager </q-toolbar-title>
 
-	<div class="q-mr-xl text-weight-bold text-caption">
-	  {{ version }}
-	</div>
+        <div class="q-mr-xl text-weight-bold text-caption">
+          {{ version }}
+        </div>
         <q-btn
-	  v-if="userStore.email !== ''"
-	  flat
-	  round
-	  type="a"
-	  href="/api/v1/user/logout"
-	  icon="logout"
-	  />
+          v-if="userStore.email !== ''"
+          flat
+          round
+          type="a"
+          href="/api/v1/user/logout"
+          icon="logout"
+        />
       </q-toolbar>
     </q-header>
 
@@ -28,22 +26,22 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
-import { useUserStore } from 'stores/user'
-import CookieNotifier from 'components/CookieNotifier.vue'
+import { defineComponent, ref } from "vue";
+import { useUserStore } from "stores/user";
+import CookieNotifier from "components/CookieNotifier.vue";
 
 export default defineComponent({
-  name: 'MainLayout',
+  name: "MainLayout",
 
   components: {
-    'cookie-notifier': CookieNotifier,
+    "cookie-notifier": CookieNotifier,
   },
-  
-  setup() {
-    const userStore = useUserStore()
-    const version = process.env.VERSION
 
-    return { userStore, version }
+  setup() {
+    const userStore = useUserStore();
+    const version = process.env.VERSION;
+
+    return { userStore, version };
   },
-})
+});
 </script>
