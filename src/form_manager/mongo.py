@@ -124,11 +124,7 @@ class MongoDatabase(ds.DataSource):
         Returns:
             bool: Whether the submission was deleted successfully.
         """
-        return bool(
-            self._db["submissions"]
-            .delete_one({"_id": ObjectId(identifier)})
-            .deleted_count
-        )
+        return bool(self._db["submissions"].delete_one({"_id": ObjectId(identifier)}).deleted_count)
 
     def close(self):
         """Close the database connection."""
