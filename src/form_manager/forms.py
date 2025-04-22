@@ -97,9 +97,7 @@ def fetch_form_info(identifier: str):
     return flask.jsonify(
         {
             "form": entry,
-            "url": flask.url_for(
-                "forms.fetch_form_info", identifier=identifier, _external=True
-            ),
+            "url": flask.url_for("forms.fetch_form_info", identifier=identifier, _external=True),
         }
     )
 
@@ -157,9 +155,7 @@ def edit_form(identifier: str):
             "status": "success",
             "identifier": identifier,
             "type": "PATCH",
-            "url": flask.url_for(
-                "forms.edit_form", identifier=identifier, _external=True
-            ),
+            "url": flask.url_for("forms.edit_form", identifier=identifier, _external=True),
         }
     )
 
@@ -279,9 +275,7 @@ def fetch_submissions(identifier):
     return flask.jsonify(
         {
             "submissions": submissions,
-            "url": flask.url_for(
-                "forms.fetch_submissions", identifier=identifier, _external=True
-            ),
+            "url": flask.url_for("forms.fetch_submissions", identifier=identifier, _external=True),
         }
     )
 
