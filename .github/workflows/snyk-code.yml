@@ -6,9 +6,11 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
 jobs:
   snyk-code-check:
     runs-on: ubuntu-latest
